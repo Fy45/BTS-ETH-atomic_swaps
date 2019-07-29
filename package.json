@@ -1,0 +1,22 @@
+{
+  "name": "bts-eth",
+  "version": "1.0.0",
+  "description": "",
+  "main": "bts.js",
+  "directories": {
+    "test": "test"
+  },
+  "dependencies": {
+    "bitsharesjs": "^3.1.1",
+    "bitsharesjs-ws": "^3.1.1",
+    "truffle-hdwallet-provider": "^1.0.14",
+    "web3": "^1.2.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
