@@ -15,7 +15,7 @@ async function ethForBts() {
   //let api_key = await prompt('Also specify your ropsten infrua api_key: ')
   let id = await prompt('Enter the account id of recipient ETH wallet: ')
   //const ethWallet = eth.connectAcc(mnemonic, api_key, id)
-  const ethWallet = eth.connectAcc(id)
+  const ethWallet = await eth.connectAcc(id)
   console.log('Ropsten ETH wallet address =', ethWallet);
 
   /* 

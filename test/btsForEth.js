@@ -22,7 +22,7 @@ async function btsForEth() {
   //let api_key = await prompt('Also specify your ropsten infrua api_key: ')
   let id = await prompt('Enter the account id of ETH wallet (sender): ')
   //const ethWallet = eth.connectAcc(mnemonic, api_key, id)
-  const ethWallet = eth.connectAcc(id)
+  const ethWallet = eth.getAddr(res,id);
   console.log('Ropsten ETH wallet address =', ethWallet);
 
   // configure the BTS party (both side)
@@ -42,8 +42,8 @@ async function btsForEth() {
   //const secret = randomBytes(32)
   let time_lock = await prompt('Enter the expiration time you want to lock (in seconds): ')
   console.log('Secret:', '0x' + Buffer.from(secret).toString('hex'));
-  let hash = hash.sha256(secret)
-  var excuted = await bts.deployHTLC(btsSender, btsRecipient, hash, value, time_lock)
+  let hash_lock = hash.sha256(secret)
+  var excuted = await bts.deployHTLC(btsSender, btsRecipient, hash_lock, value, time_lock)
   // we have 2 return values from the deploy function that we need.
   const btsHtlcid = excuted.id;
   const btsHtlcrespone = excuted.response;
@@ -54,9 +54,9 @@ async function btsForEth() {
    * time_lock value in minutes 
    * and create htlc contract
    */
-  hash = '0x' + Buffer.from(hash).toString('hex')
+  hash_lock = '0x' + Buffer.from(hash_lock).toString('hex')
   time_lock = parseInt(time_lock / (60*2)) // this is for less time for bts side to redeem the contract
-  const ethHtlcAddress = await eth.deployHTLC(ethWallet, ethRecipient, hash, time_lock)
+  const ethHtlcAddress = await eth.deployHTLC(ethWallet, ethRecipient, hash_lock, time_lock)
 
   // Keeping logs on console
   console.log('BTS HTLC id:', btsHtlcid);

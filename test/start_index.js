@@ -4,7 +4,6 @@ const ethForBts = require('./ethForBts')
 const prompt = require('./prompt')
 
 async function main() {
-  await bts.connect()
   console.log('Enter 1 to send BTS to ETH');
   console.log('      2 to receive BTS from ETH');
   

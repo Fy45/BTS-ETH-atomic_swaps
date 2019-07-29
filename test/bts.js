@@ -209,7 +209,7 @@ async function resolveHTLC(Htlcid, Recipient, secret){
 
 					});
 				});
-		}
+		});
 }
 
 /*
@@ -264,10 +264,10 @@ async function extendHTLC(id, seconds){
 							tr
 								.broadcast()
 								.then(result => {
-									//const reply =  
+									const reply =  result[0].trx.expiration;
 									console.log(
 										"HashTimelockContract was successfully extended!");
-									console.log("Please redeem the contract before: ", result);
+									console.log("Please redeem the contract before: ", reply);
 									
 						})
 								.catch(err => {
