@@ -9,14 +9,10 @@ env_api = "https://ropsten.infura.io/10347709826848a9a4347a1be1d02aa8";
 provider = new HDWalletProvider(MY_SECRET_MNEMONIC, env_api,0,2);
 const eth = new web3(provider);
 
-eth.eth.getAccounts().then(function(e){
-	doNext(e);
-	console.log(e)}
-	);
-function doNext (e){
-	firstacc = e[0];
-	console.log("acc:",firstacc);
-}
+let accounts= eth.eth.getAccounts();
+
+
+console.log("acc:",accounts);
     //console.log("account used: " + accounts[1]);
     // result = await new web3.eth.Contract(JSON.parse(compileFactory.interface))
     //     .deploy({data: "0x"+compileFactory.bytecode})

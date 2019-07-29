@@ -108,12 +108,8 @@ async function deployHTLC(sender, recipient, hash, amount, time_lock){
 								});
 						});
 					});
-			}
-
-				)
-			}
-		
-		)
+			});
+		});
 }
 function getHtlcId(res){
 	const response = res;

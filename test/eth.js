@@ -1,5 +1,6 @@
 const fs = require('fs')
 const Eth = require('web3')
+const util = require("util")
 const HDWalletProvider = require("truffle-hdwallet-provider")
 MY_SECRET_MNEMONIC = "cycle little able wish run zoo ethics twenty switch lava magnet jungle";
 env_api = "https://ropsten.infura.io/10347709826848a9a4347a1be1d02aa8";
@@ -25,19 +26,16 @@ const HTLC_bin = fs.readFileSync(__dirname + '/../build/contracts/HTLC.bin').toS
 //   });
 // }
 
-function connectAcc() {
-  provider = new HDWalletProvider(MY_SECRET_MNEMONIC, env_api);
+async function connectAcc(id) {
+  provider = new HDWalletProvider(MY_SECRET_MNEMONIC, env_api,0,10);
   const eth = new Eth(provider);
-  eth.eth.getAccounts().then(res =>{
-    getAddr(res,id);
-    //console.log("account used:", res[id]);
-  });
+  let  address = await eth.eth.getAccounts();
+  address = address[id];
+
+  return address;
   
 }
-async function getAddr(res,id){
-  acc = res[id];
-  return acc;
-}
+
 
 
 /*
@@ -106,7 +104,6 @@ async function refundHTLC(sender, address) {
 
 module.exports = {
   connectAcc,
-  getAddr,
   deployHTLC,
   verifyHTLC,
   resolveHTLC,
