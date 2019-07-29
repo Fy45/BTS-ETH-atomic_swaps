@@ -47,7 +47,7 @@ let rpKey = PrivateKey.fromWif(rprivKey);
 // connect();
 
 async function deployHTLC(sender, recipient, hash, amount, time_lock){
-	Apis.instance(rpc_endpoint_url, true).init_promise.then(
+	return Apis.instance(rpc_endpoint_url, true).init_promise.then(
 		res => {
 			console.log("Successfully connected to BTS local test network.")
 			ChainStore.init(false).then(() => {

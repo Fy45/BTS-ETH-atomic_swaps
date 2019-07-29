@@ -48,10 +48,10 @@ async function btsForEth() {
   //const secret = randomBytes(32)
   let time_lock = await prompt('Enter the expiration time you want to lock (in seconds): ')
   let hash_lock = hash.sha256(secret)
-  var excuted = await bts.deployHTLC(btsSender, btsRecipient, hash_lock, value, time_lock)
-  // we have 2 return values from the deploy function that we need.
-  const btsHtlcid = excuted.id;
-  const btsHtlcrespone = excuted.response;
+  // var excuted = await bts.deployHTLC(btsSender, btsRecipient, hash_lock, value, time_lock)
+  // // we have 2 return values from the deploy function that we need.
+  // const btsHtlcid = excuted.id;
+  // const btsHtlcrespone = excuted.response;
 
 
   /* 
@@ -65,7 +65,7 @@ async function btsForEth() {
   const ethHtlcAddress = await eth.deployHTLC(ethWallet, ethRecipient, hash_lock, time_lock)
 
   // Keeping logs on console
-  console.log('BTS HTLC id:', btsHtlcid);
+  //console.log('BTS HTLC id:', btsHtlcid);
   console.log('ETH HTLC address:', ethHtlcAddress);
   console.log(`Enter 1 if agreed amount of ETH has been sent to ${ethHtlcAddress}`);
   let answer = await prompt('Or enter 2 to extend your HTLC contract before the timeout: ')

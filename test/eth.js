@@ -7,7 +7,8 @@ env_api = "https://ropsten.infura.io/10347709826848a9a4347a1be1d02aa8";
 
 const HTLC_abi = require('../build/contracts/HTLC')
 const HTLC_bin = fs.readFileSync(__dirname + '/../build/contracts/HTLC.bin').toString()
-
+let provider = new HDWalletProvider(MY_SECRET_MNEMONIC, env_api,0,10);
+const web3 = new Eth(provider);
 /*
  * the function connectAcc() and getAcc() aim to 
  * connect to ropsten testnet using metamask account info
@@ -20,16 +21,15 @@ const HTLC_bin = fs.readFileSync(__dirname + '/../build/contracts/HTLC.bin').toS
 //   MY_SECRET_MNEMONIC = mnemonic;
 //   env_api = api_key;
 //   provider = new HDWalletProvider(MY_SECRET_MNEMONIC, env_api);
-//   const eth = new Eth(provider);
-//   eth.eth.getAccounts().then( function(e) => {
+//   const web3 = new Eth(provider);
+//   web3.eth.getAccounts().then( function(e) => {
 //     getAcc(e,id);
 //   });
 // }
 
 async function connectAcc(id) {
-  provider = new HDWalletProvider(MY_SECRET_MNEMONIC, env_api,0,10);
-  const eth = new Eth(provider);
-  let  address = await eth.eth.getAccounts();
+
+  let  address = await web3.eth.getAccounts();
   address = address[id];
 
   return address;
@@ -47,7 +47,7 @@ async function connectAcc(id) {
 
 async function deployHTLC(sender, recipient, hash, time_lock) {
   console.log('Deploying ETH HTLC contract...');
-  const HTLC = new eth.Contract(HTLC_abi)
+  const HTLC = new web3.eth.Contract(HTLC_abi)
   const contract = await HTLC.deploy({
     data: '0x' + HTLC_bin,
     arguments: [recipient, hash, time_lock]
@@ -59,7 +59,7 @@ async function deployHTLC(sender, recipient, hash, time_lock) {
 }
 
 async function verifyHTLC(address) {
-  const contract = new eth.Contract(HTLC_abi, address)
+  const contract =  new web3.eth.Contract(HTLC_abi, address)
   const hashSecret = await contract.methods.hashSecret().call()
   let unlockTime = await contract.methods.unlockTime().call()
   unlockTime = new Date(unlockTime * 1000)
@@ -69,7 +69,7 @@ async function verifyHTLC(address) {
 }
 
 async function resolveHTLC(sender, address, secret) {
-  const contract = new eth.Contract(HTLC_abi, address)
+  const contract =  new web3.eth.Contract(HTLC_abi, address)
   await contract.methods.resolve(secret).send({
     from: sender,
     gas: 5e4
@@ -77,12 +77,12 @@ async function resolveHTLC(sender, address, secret) {
 }
 
 async function waitForHTLC(address) {
-  const contract = new eth.Contract(HTLC_abi, address)
+  const contract =  new web3.eth.Contract(HTLC_abi, address)
   const unlockTime = await contract.methods.unlockTime().call()
   return new Promise((resolve, reject) => {
     const poll = setInterval(async function() {
       const secret = await contract.methods.secret().call()
-      const block = await eth.getBlock('latest')
+      const block = await web3.eth.getBlock('latest')
       if (secret !== '0x0000000000000000000000000000000000000000000000000000000000000000') {
         clearInterval(poll)
         resolve(secret)
@@ -95,7 +95,7 @@ async function waitForHTLC(address) {
 }
 
 async function refundHTLC(sender, address) {
-  const contract = new eth.Contract(HTLC_abi, address)
+  const contract =  new web3.eth.Contract(HTLC_abi, address)
   await contract.methods.refund().send({
     from: sender,
     gas: 5e4
