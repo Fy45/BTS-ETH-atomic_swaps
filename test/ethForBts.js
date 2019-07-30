@@ -35,7 +35,7 @@ async function ethForBts() {
   const btsHashSecret = await bts.verifyHTLC(btsHtlcid, btsHtlcresponse)
   //console.log(btsHashSecret);
   console.log('\nETH HTLC:');
-  const ethHashSecret = await eth.verifyHTLC(ethHtlcId).hash
+  const ethHashSecret = await eth.verifyHTLC(ethHtlcId)
   if ('0x' + btsHashSecret !== ethHashSecret) {
     throw "Hashes don't match"
   }

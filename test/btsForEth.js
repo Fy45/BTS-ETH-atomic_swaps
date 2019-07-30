@@ -74,27 +74,23 @@ async function btsForEth() {
   // Keeping logs on console
   console.log('BTS HTLC id:', btsHtlcid);
   console.log('ETH HTLC id:', ethHtlcId);
-  console.log(`Enter 1 if you want to redeem the agreed amount of ETH from contract ${ethHtlcId}`);
-  let answer = await prompt('Or enter 2 to extend your HTLC contract before the timeout: ')
+  console.log(`Enter y if you want to redeem the agreed amount of ETH from contract ${ethHtlcId}`);
+  let answer = await prompt('Or enter exit: ')
   switch (answer) {
-    case '1':
+    case 'y':
       console.log('Resolving ETH HTLC...');
       await eth.resolveHTLC(ethRecipient, ethHtlcId, '0x' + Buffer.from(secret).toString('hex'),)
       break
-    case '2':
-      Extratime = await prompt('Enter the extra time you need for contract (in seconds): ')
-      await bts.extendHTLC(btsSender, btsHtlcid, Extratime);
-      fs.readFile('contract_extend_info.txt', 'utf8',(err,output) => {
-        if(err){
-          reject(console.log(err))
-        }else{
-          resolve(console.log(output))
-        }
-      });
-
+    case 'exit':
+      console.log('Exiting...');
       break
+      
   }
+ 
 }
+
+
+
 
 module.exports = btsForEth
 

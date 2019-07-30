@@ -1,3 +1,4 @@
+const web3 = require('web3')
 if (!global.assert) global.assert = require('chai').assert
 
 const assertEqualBN = (actual, expected, msg = 'numbers not equal') => {
