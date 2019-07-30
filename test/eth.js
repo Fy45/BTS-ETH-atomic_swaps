@@ -1,12 +1,14 @@
 const fs = require('fs')
 const Eth = require('web3')
 const util = require("util")
+const crypto = require('crypto')
+const assertEqualBN = require('./helper/assert')
 const HDWalletProvider = require("truffle-hdwallet-provider")
 MY_SECRET_MNEMONIC = "cycle little able wish run zoo ethics twenty switch lava magnet jungle";
 env_api = "https://ropsten.infura.io/10347709826848a9a4347a1be1d02aa8";
+const HTLC_abi = require('../build/contracts/HashedTimelock')
+const HTLC_contract_address = '0x243785f6b65418191ea20b45fde7069ffe4f8cef'
 
-const HTLC_abi = require('../build/contracts/HTLC')
-const HTLC_bin = fs.readFileSync(__dirname + '/../build/contracts/HTLC.bin').toString()
 let provider = new HDWalletProvider(MY_SECRET_MNEMONIC, env_api,0,10);
 const web3 = new Eth(provider);
 
@@ -38,51 +40,158 @@ async function connectAcc(id) {
   
 }
 
-  /*
-   * deployHTLC pass one more parameter: time_lock
-   * format is the string number
-   * e.g. 30
-   * it will pass as the unlock time = now + 30 mins in contract
-   */
 
-async function deployHTLC(sender, recipient, hash, time_lock) {
+const txLoggedArgs = txReceipt => txReceipt.logs[0].args
+const txContractId = txReceipt => txLoggedArgs(txReceipt).contractId
+const nowSeconds = () => Math.floor(Date.now() / 1000)
+const getBalance = async (address) => web3.utils.toBN(await web3.eth.getBalance(address))
+const txGas = (txReceipt, gasPrice = defaultGasPrice) => web3.utils.toBN(txReceipt.receipt.gasUsed * gasPrice)
+const isSha256Hash = hashStr => /^0x[0-9a-f]{64}$/i.test(hashStr)
+
+
+
+async function deployHTLC(sender, recipient, hash, time_lock, amount) {
+  const htlc = new web3.eth.Contract(HTLC_abi, HTLC_contract_address)
   console.log('Deploying...');
-  const HTLC = new web3.eth.Contract(HTLC_abi)
-  const contract = await HTLC.deploy({
-    data: '0x' + HTLC_bin,
-    arguments: [recipient, hash, time_lock]
-  }).send({
-    from: sender,
-    gas: 4e5
-  })
+
+  const timeLock = nowSeconds() + time_lock
+
+
+  if (amount == 0){
+    throw 'expected failure due to 0 value transferred'
+  } 
+  if (timeLock == nowSeconds()-1){
+    throw 'expected failure due to past timelock'
+  }
+  let amountWei = web3.utils.toWei(amount.toString(),'ether')
+
+  const txReceipt = await htlc.methods.newContract(
+    recipient,
+    hash,
+    timeLock
+  ).send(
+       {
+      from: sender,
+      value: amount,
+      gas: 200000,
+    }
+)
+  
+  const logArgs = txLoggedArgs(txReceipt)
+  const contractId = logArgs.contractId
+  assert(isSha256Hash(contractId))
+
+  assert.equal(logArgs.sender, sender)
+  assert.equal(logArgs.receiver, recipient)
+  assertEqualBN(logArgs.amount, amount)
+  assert.equal(logArgs.hashlock, hash)
+  assert.equal(logArgs.timelock, timeLock)
+
+
+  const contractArr = await htlc.methods.getContract.call(contractId)
+  const contract = htlcArrayToObj(contractArr)
+  assert.equal(contract.sender, sender)
+  assert.equal(contract.receiver, recipient)
+  assertEqualBN(contract.amount, amount)
+  assert.equal(contract.hashlock, hash)
+  assert.equal(contract.timelock.toNumber(), timeLock)
+  assert.isFalse(contract.withdrawn)
+  assert.isFalse(contract.refunded)
+  assert.equal(
+    contract.preimage,
+    '0x0000000000000000000000000000000000000000000000000000000000000000'
+  )
+
   console.log("ETH HashTimelockContract was successfully created!");
-  return contract.options.address
+  return contractId;
 }
 
-async function verifyHTLC(address) {
-  const contract =  new web3.eth.Contract(HTLC_abi, address)
-  const hashSecret = await contract.methods.hashSecret().call()
-  let unlockTime = await contract.methods.unlockTime().call()
+async function verifyHTLC(contractId) {
+  const htlc = new web3.eth.Contract(HTLC_abi, HTLC_contract_address)
+
+  const contractArr = await htlc.methods.getContract.call(contractId)
+  const contract = htlcArrayToObj(contractArr)
+  
+  const hashSecret = contract.hashlock
+  const Receiver = contract.receiver
+  const Amount = contract.amount
+  let unlockTime = contract.timelock.toNumber()
   unlockTime = new Date(unlockTime * 1000)
-  console.log(`Hash root     | ${hashSecret}`)
-  console.log(`Unlock time   | ${unlockTime} (~ ${Math.max(0, Math.floor((unlockTime-Date.now())/6e4))} mins)`)
-  return hashSecret
+  console.log(`Sender          | ${contract.sender}`);
+  console.log(`Reciever        | ${Receiver}`);
+  console.log(`Transfer amount | ${Amount}`);
+  console.log(`Hash root       | ${hashSecret}`)
+  console.log(`Unlock time     | ${unlockTime} (~ ${Math.max(0, Math.floor((unlockTime-Date.now())/6e4))} mins)`)
+
+  return {
+    hash: hashSecret,
+    receiver: Receiver,
+    timelock: unlockTime,
+    amount: Amount
+  }
+
 }
 
-async function resolveHTLC(sender, address, secret) {
-  const contract =  new web3.eth.Contract(HTLC_abi, address)
-  await contract.methods.resolve(secret).send({
-    from: sender,
-    gas: 5e4
+
+async function resolveHTLC(receiver, contractId, secret) {
+  const htlc = new web3.eth.Contract(HTLC_abi, HTLC_contract_address)
+
+  var hashSecret = verifyHTLC(contractId).hash
+  var Receiver = verifyHTLC(contracId).receiver
+  var timelock = verifyHTLC(contracId).timelock
+  var amount = verifyHTlc(contractId).Amount
+
+
+
+  const hashlock = sha256(secret)
+
+  if ('0x' + Buffer.from(hashlock).toString('hex') != hashSecret){
+    throw 'expected failure due to wrong secret!'
+  }
+  if (receiver != Receiver){
+    throw 'expected failure due to wrong receiver'
+  }
+  if (Math.floor(timelock-Date.now()) <=0){
+    throw 'expected failure due to withdraw after timelock expired'
+  }
+  const receiverBalanceBefore = await getBalance(receiver)
+  const withdrawTx = await htlc.methods.withdraw(contractId, secret, {
+    from: receiver,
   })
+  const tx = await web3.eth.getTransaction(withdrawTx.tx)
+
+  // Check contract funds are now at the receiver address
+
+  const expectedBalance = receiverBalanceBefore
+                               .add(amount)
+                              .sub(txGas(withdrawTx, tx.gasPrice))
+  assertEqualBN(
+    await getBalance(receiver),
+    expectedBalance,
+    "receiver balance doesn't match"
+    )
+
+  const contractArr = await htlc.methods.getContract.call(contractId)
+  const contract = htlcArrayToObj(contractArr)
+  assert.isTrue(contract.withdrawn) // withdrawn set
+  assert.isFalse(contract.refunded) // refunded still false
+  assert.equal(contract.preimage, secret)
+
+  console.log("ETH HashTimelockContract was successfully redeemed!");
+
 }
 
-async function waitForHTLC(address) {
-  const contract =  new web3.eth.Contract(HTLC_abi, address)
-  const unlockTime = await contract.methods.unlockTime().call()
+async function waitForHTLC(contractId) {
+  const htlc = new web3.eth.Contract(HTLC_abi, HTLC_contract_address)
+
+
+  const contractArr = await htlc.methods.getContract.call(contractId)
+  const contract = htlcArrayToObj(contractArr)
+  const unlockTime = contract.timelock.toNumber()
+
   return new Promise((resolve, reject) => {
     const poll = setInterval(async function() {
-      const secret = await contract.methods.secret().call()
+      const secret = contract.preimage
       const block = await web3.eth.getBlock('latest')
       if (secret !== '0x0000000000000000000000000000000000000000000000000000000000000000') {
         clearInterval(poll)
@@ -95,12 +204,35 @@ async function waitForHTLC(address) {
   })
 }
 
-async function refundHTLC(sender, address) {
-  const contract =  new web3.eth.Contract(HTLC_abi, address)
-  await contract.methods.refund().send({
-    from: sender,
-    gas: 5e4
+async function refundHTLC(sender, contractId) {
+  const htlc = new web3.eth.Contract(HTLC_abi, HTLC_contract_address)
+
+  let contract = await htlc.methods.getContract.call(contractId)
+  const amount = contract.amount
+  const timelock = contract.timelock.toNumber()
+  if(nowSeconds() < timelock){
+    throw 'expected failure due to timelock'
+  }
+
+  
+  const senderBalanceBefore = await getBalance(sender)
+  const refundTx = await htlc.methods.refund(contractId,{
+    from: sender
   })
+  const tx = await web3.eth.getTransaction(refundTx.tx)
+  const expectedBalance = senderBalanceBefore
+                                  .add(amount)
+                                  .sub(txGas(refundTx, tx.gasPrice))
+          assertEqualBN(
+            await getBalance(sender),
+            expectedBalance,
+            "sender balance doesn't match"
+          )
+          contract = await htlc.methods.getContract.call(contractId)
+          assert.isTrue(contract[6]) // refunded set
+          assert.isFalse(contract[5]) // withdrawn still false
+
+  console.log("ETH HashTimelockContract was successfully refunded!");
 }
 
 module.exports = {

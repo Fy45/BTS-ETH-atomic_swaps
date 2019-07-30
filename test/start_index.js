@@ -1,6 +1,6 @@
 const btsForEth = require('./btsForEth')
 const ethForBts = require('./ethForBts')
-const prompt = require('./prompt')
+const prompt = require('./helper/prompt')
 
 async function main() {
 
