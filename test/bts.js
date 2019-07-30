@@ -6,6 +6,14 @@ const PrivateKey = require('bitsharesjs').PrivateKey;
 const hash = require('bitsharesjs').hash;
 //const btsForEth = require('./btsForEth') is wrong, we are not allowed to circular dependency
 const web3 = require('web3')
+const fs = require('fs')
+
+function log(message){
+	fs.writeFileSync('contract_info.txt', message, 'utf8');
+}
+function ehtlc(message){
+	fs.writeFileSync('contract_extend_info.txt', message, 'utf8');
+}
 
 /*
  * Here we need to specify the rpc_endpoint_url since I am using the local private testnet
@@ -85,9 +93,8 @@ async function deployHTLC(sender, recipient, Hash, amount, timelock, secret){
 								.broadcast()
 								.then (result => {
 									console.log(
-										"HashTimelockContract was successfully created!" );
-									console.log("HTLC contract id: ", getHtlcId(result).id);
-									console.log("HTLC response: ", getHtlcId(result).response);
+										"BTS HashTimelockContract was successfully created!" );
+									log(JSON.stringify(result));
 								})
 								.catch( error => {
 									console.error(error);
@@ -96,37 +103,31 @@ async function deployHTLC(sender, recipient, Hash, amount, timelock, secret){
 					});
 			};
 
-function getHtlcId(res){
-	const response = JSON.stringify(res);
-	const result = res[0].trx.operation_results[0];
-	const htlc_id = result[1];
-
-	return {
-		id:htlc_id, 
-		response:response
-	};
-}
 
 async function verifyHTLC(htlc_id, Response){
-	let response = JSON.parse(Response);
+	let response = Response;
 	const op = response[0].trx.operations[0];
-	const op_result = res[0].trx.operation_results[0];
+	const op_result = response[0].trx.operation_results[0];
+	const expiration = response[0].trx.expiration
+
 	const hash = op[1].preimage_hash[1];
-	var timelock = op[1].claim_period_seconds;
 	var amount = op[1].amount.amount;
 	const accountId = op[1].from;
+	const timelock = op[1].claim_period_seconds;
+	let time_lock = parseInt(timelock);
+
 	const htlcId = op_result[1];
 
-	let time_lock = parseInt(timelock);
 
 	if(htlc_id != htlcId){
 		throw 'Hash Time lock Contract id does not match'
 	}
-	console.log("Please check the following conditions: \n");
+	console.log("Please check the following conditions:");
 	console.log("Transaction amount: ", amount);
 	console.log("From Account id: ", accountId);
 	console.log("Preimage hashed value: ", hash);
-	console.log("Expiration time left (in seconds): ", time_lock);
+	console.log("Total time_lock(seconds): ", time_lock);
+	console.log("Expiration time: ", expiration);
 
 	return hash;
 }
@@ -156,9 +157,9 @@ async function resolveHTLC(Htlcid, Recipient, secret){
 							extensions: null
 						};
 
-						console.log(
-							"tx prior serialization \n", 
-							operationJSON);
+						// console.log(
+						// 	"tx prior serialization \n", 
+						// 	operationJSON);
 
 						tr.add_type_operation("htlc_redeem", operationJSON);
 
@@ -166,16 +167,16 @@ async function resolveHTLC(Htlcid, Recipient, secret){
 
 							tr.add_signer(rpKey, rpKey.toPublicKey().toPublicKeyString());
 
-							console.log(
-								"serialized transaction: \n",
-								tr.serialize().operations
-								);
+							// console.log(
+							// 	"serialized transaction: \n",
+							// 	tr.serialize().operations
+							// 	);
 
 							tr
 								.broadcast()
 								.then(result => {
 									console.log(
-										"HashTimelockContract was successfully redeemed! "
+										"BTS HashTimelockContract was successfully redeemed! "
 										);
 
 								})
@@ -193,7 +194,7 @@ async function resolveHTLC(Htlcid, Recipient, secret){
  * Taking transactionBuilder test code function as example
  */
 
-async function extendHTLC(id, seconds){
+async function extendHTLC(sender, id, seconds){
 				let fromAccount = sender;
 
 				Promise.all([
@@ -215,9 +216,9 @@ async function extendHTLC(id, seconds){
 							extensions: null
 						};
 
-						console.log(
-							"extend operation serialization \n",
-							operationJSON );
+						// console.log(
+						// 	"extend operation serialization \n",
+						// 	operationJSON );
 
 
 						tr.add_type_operation("htlc_extend", operationJSON);
@@ -225,18 +226,18 @@ async function extendHTLC(id, seconds){
 						tr.set_required_fees().then(() => {
 							tr.add_signer(spKey, spKey.toPublicKey().toPublicKeyString());
 
-							console.log(
-								"serialized transaction: \n",
-								tr.serialize().operations
-								);
+							// console.log(
+							// 	"serialized transaction: \n",
+							// 	tr.serialize().operations
+							// 	);
 
 							tr
 								.broadcast()
 								.then(result => {
 									const reply =  result[0].trx.expiration;
-									console.log(
-										"HashTimelockContract was successfully extended!");
-									console.log("Please redeem the contract before: ", reply);
+									ehtlc(
+										"BTS HashTimelockContract was successfully extended! \nPlease redeem the contract before: " + reply);
+									
 									
 						})
 								.catch(err => {

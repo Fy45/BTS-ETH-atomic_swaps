@@ -8,6 +8,7 @@ const hash = require('bitsharesjs').hash;
 const bts = require('./bts')
 const eth = require('./eth')
 const prompt = require('./prompt')
+const fs = require('fs')
 
 async function btsForEth() {
   
@@ -47,12 +48,7 @@ async function btsForEth() {
    */
   value = parseFloat(value);
   let hash_lock = hash.sha256(secret);
-  var excuted = await bts.deployHTLC(btsSender, btsRecipient, hash_lock, value, time_lock, secret)
-   // we have 2 return values from the deploy function that we need.
-  console.log(excuted);
-  // const btsHtlcid = excuted.id;
-  // const btsHtlcrespone = excuted.response;
-
+  let result = await bts.deployHTLC(btsSender, btsRecipient, hash_lock, value, time_lock, secret)
 
 
   /* 
@@ -67,7 +63,10 @@ async function btsForEth() {
 
 
 
-
+  // resolve json response from bts HTLC and get the info we need
+  let btsHtlcresponse = JSON.parse(fs.readFileSync('contract_info.txt', 'utf8'));
+  result = btsHtlcresponse[0].trx.operation_results[0];
+  let btsHtlcid = result[1];
 
   // Keeping logs on console
   console.log('BTS HTLC id:', btsHtlcid);
@@ -77,13 +76,22 @@ async function btsForEth() {
   switch (answer) {
     case '1':
       console.log('Resolving ETH HTLC...');
-      await eth.resolveHTLC(ethWallet, ethHtlcAddress, '0x' + secret.toString('hex'))
+      await eth.resolveHTLC(ethWallet, ethHtlcAddress, '0x' + Buffer.from(secret).toString('hex'))
       break
     case '2':
       Extratime = await prompt('Enter the extra time you need for contract (in seconds): ')
-      await bts.extendHTLC(btsHtlcid, Extratime)
+      await bts.extendHTLC(btsSender, btsHtlcid, Extratime);
+      fs.readFile('contract_extend_info.txt', 'utf8',(err,output) => {
+        if(err){
+          reject(console.log(err))
+        }else{
+          resolve(console.log(output))
+        }
+      });
+
       break
   }
 }
 
 module.exports = btsForEth
+

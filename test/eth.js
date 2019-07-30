@@ -9,14 +9,17 @@ const HTLC_abi = require('../build/contracts/HTLC')
 const HTLC_bin = fs.readFileSync(__dirname + '/../build/contracts/HTLC.bin').toString()
 let provider = new HDWalletProvider(MY_SECRET_MNEMONIC, env_api,0,10);
 const web3 = new Eth(provider);
-/*
- * the function connectAcc() and getAcc() aim to 
- * connect to ropsten testnet using metamask account info
- * and get the send/receive account as desired
- * the first account id is 0
- * the commented line are meant for other users
- * till now is test only
- */
+
+
+  /*
+   * the function connectAcc() and getAcc() aim to 
+   * connect to ropsten testnet using metamask account info
+   * and get the send/receive account as desired
+   * the first account id is 0
+   * the commented line are meant for other users
+   * till now is test only
+   */
+
 // async function connectAcc(mnemonic, api_key, id) {
 //   MY_SECRET_MNEMONIC = mnemonic;
 //   env_api = api_key;
@@ -29,24 +32,21 @@ const web3 = new Eth(provider);
 
 async function connectAcc(id) {
 
-  let  address = await web3.eth.getAccounts();
-  address = address[id];
-
+  let  account = await web3.eth.getAccounts();
+  address = account[id];
   return address;
   
 }
 
-
-
-/*
- * deployHTLC pass one more parameter: time_lock
- * format is the string number
- * e.g. 30
- * it will pass as the unlock time = now + 30 mins in contract
- */
+  /*
+   * deployHTLC pass one more parameter: time_lock
+   * format is the string number
+   * e.g. 30
+   * it will pass as the unlock time = now + 30 mins in contract
+   */
 
 async function deployHTLC(sender, recipient, hash, time_lock) {
-  console.log('Deploying ETH HTLC contract...');
+  console.log('Deploying...');
   const HTLC = new web3.eth.Contract(HTLC_abi)
   const contract = await HTLC.deploy({
     data: '0x' + HTLC_bin,
@@ -55,6 +55,7 @@ async function deployHTLC(sender, recipient, hash, time_lock) {
     from: sender,
     gas: 4e5
   })
+  console.log("ETH HashTimelockContract was successfully created!");
   return contract.options.address
 }
 
