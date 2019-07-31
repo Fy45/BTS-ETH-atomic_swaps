@@ -12,7 +12,7 @@ const sha256 = x =>
 const nowSeconds = () => Math.floor(Date.now() / 1000)
 
 
-let secret = "K!Q$]Z7Nyh%CTzw?3X*N)[]wnUVp_-$y";
+let secret = "*(fixed)*888efgiqe";
 const x = web3.utils.randomHex(32)
 const toAscii = web3.utils.fromAscii(secret);
 const buffer = '0x'+ new Buffer.from(secret).toString('hex');

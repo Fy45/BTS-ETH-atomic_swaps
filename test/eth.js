@@ -167,7 +167,7 @@ async function resolveHTLC(receiver, contractId, secret) {
   const receiverBalanceBefore = await getBalance(receiver)
   await htlc.methods.withdraw(
     contractId,
-    secret).send({from: receiver}).on('receipt',function(receipt){
+    secret).send({from: receiver, gas:200000}).on('receipt',function(receipt){
       console.log(receipt);
     })
 

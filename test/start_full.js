@@ -30,15 +30,15 @@ async function main() {
       btsHtlcid = await prompt('Enter BTS HTLC_id you want to extend: ')
       Extratime = await prompt('Enter the extra time you need for contract (in seconds): ')
       await bts.extendHTLC(btsSender, btsHtlcid, Extratime);
-
+      await sleep(10000);
+      const output = fs.readFileSync('contract_extend_info.txt', 'utf8');
+      console.log(output);
       break
     case '4':
       ethRecipient = await prompt('Enter your ETH receiver address: ')
       ethHtlcId = await prompt('Enter your ETH HTLC id: ')
       secret = await prompt('Enter your preimage: ')
       await eth.resolveHTLC(ethRecipient, ethHtlcId, '0x' + Buffer.from(secret).toString('hex'),)
-      await sleep(2000);
-      const output = fs.readFileSync('contract_extend_info.txt', 'utf8');
       break
   }
   process.exit()
