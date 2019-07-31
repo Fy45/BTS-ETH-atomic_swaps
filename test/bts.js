@@ -5,7 +5,6 @@ const FetchChain = require('bitsharesjs').FetchChain;
 const PrivateKey = require('bitsharesjs').PrivateKey;
 const hash = require('bitsharesjs').hash;
 //const btsForEth = require('./btsForEth') is wrong, we are not allowed to circular dependency
-const web3 = require('web3')
 const fs = require('fs')
 
 function log(message){
@@ -122,18 +121,17 @@ async function verifyHTLC(htlc_id, Response){
 	if(htlc_id != htlcId){
 		throw 'Hash Time lock Contract id does not match'
 	}
-	console.log("Please check the following conditions:");
-	console.log("Transaction amount: ", amount);
-	console.log("From Account id: ", accountId);
-	console.log("Preimage hashed value: ", hash);
-	console.log("Total time_lock(seconds): ", time_lock);
-	console.log("Expiration time: ", expiration);
+	console.log(`Transaction amount      | ${amount} BTS`);
+	console.log(`From Account id 	     | ${accountId}`);
+	console.log(`HashLock                | ${hash}`);
+	console.log(`Total timeLock(seconds) | ${time_lock}`);
+	console.log(`Expiration time         | ${expiration}`);
 
 	return hash;
 }
 
 async function resolveHTLC(Htlcid, Recipient, secret){
-	const preimage = web3.utils.toAscii(secret);
+	
 	let toAccount = Recipient;
 				Promise.all(
 					[FetchChain("getAccount", toAccount)]).then (res => {
@@ -142,11 +140,11 @@ async function resolveHTLC(Htlcid, Recipient, secret){
 
 						let tr = new TransactionBuilder();
 
-						let preimageValue = preimage;
+						let preimageValue = secret.substring(1);
 
 						let operationJSON = {
 
-							preimage: new Buffer(preimageValue).toString("hex"),
+							preimage: preimageValue,
 							fee: 
 							{
 								amount: 0,

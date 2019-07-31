@@ -9,6 +9,7 @@ const bts = require('./bts')
 const eth = require('./eth')
 const prompt = require('./helper/prompt')
 const fs = require('fs')
+const web3 = require('web3')
 
 async function btsForEth() {
   
@@ -17,7 +18,8 @@ async function btsForEth() {
   let btsSender = await prompt('Enter BTS account name of sender: ')
   let btsRecipient = await prompt('Enter BTS account name of recipient: ') 
   let value = await prompt('Enter BTS amount to send: ')
-  //let rate = await prompt('Enter the exchange rate both parties are agreed on: ')
+  let rate = await prompt('Enter the exchange rate both parties are agreed on (e.g. 0.00020788): ')
+  console.log("In order to resolve the contract smoothly, we highly recommended 32 length of secret use!");
   let secret = await prompt('Enter the preimage value you generate: ') 
   //const secret = randomBytes(32)
   let time_lock = await prompt('Enter the expiration time you want to lock (in seconds): ')
@@ -48,7 +50,8 @@ async function btsForEth() {
    * generate the htlc contract on BTS side
    */
   value = parseFloat(value);
-  let hash_lock = hash.sha256(secret);
+  let Secret = new Buffer.from(secret).toString('hex');
+  let hash_lock = hash.sha256(Secret);
   let result = await bts.deployHTLC(btsSender, btsRecipient, hash_lock, value, time_lock, secret)
 
 
@@ -59,8 +62,9 @@ async function btsForEth() {
    */
   //console.log('Secret:', '0x' + Buffer.from(secret).toString('hex'));
   hash_lock = '0x' + Buffer.from(hash_lock).toString('hex')
+  console.log(hash_lock);
   time_lock = parseInt(time_lock / 2) // this is for less time for bts side to redeem the contract
-  let ethAmount = value * 1 ;
+  let ethAmount = value * rate ;
   console.log("ethAmount: ", ethAmount);
   const ethHtlcId = await eth.deployHTLC(ethWallet, ethRecipient, hash_lock, time_lock, ethAmount)
 
@@ -79,7 +83,7 @@ async function btsForEth() {
   switch (answer) {
     case 'y':
       console.log('Resolving ETH HTLC...');
-      await eth.resolveHTLC(ethRecipient, ethHtlcId, '0x' + Buffer.from(secret).toString('hex'),)
+      await eth.resolveHTLC(ethRecipient, ethHtlcId, web3.utils.asciiToHex(secret))
       break
     case 'exit':
       console.log('Exiting...');
