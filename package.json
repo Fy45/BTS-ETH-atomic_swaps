@@ -11,8 +11,8 @@
     "bitsharesjs-ws": "^3.1.1",
     "ethereumjs-abi": "^0.6.7",
     "log4js": "^4.5.1",
-    "truffle-hdwallet-provider": "^1.0.14",
-    "web3": "^1.0.0-beta.37"
+    "truffle-hdwallet-provider": "^1.0.15",
+    "web3": "^1.2.0"
   },
   "devDependencies": {
     "chai": "^4.2.0"

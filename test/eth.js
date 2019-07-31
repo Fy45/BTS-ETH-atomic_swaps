@@ -78,7 +78,7 @@ async function deployHTLC(sender, recipient, hash, time_lock, amount) {
        {
       from: sender,
       value: amountWei,
-      gas: 200000,
+      gas: 200000
     }
 )
 
@@ -127,7 +127,7 @@ async function verifyHTLC(contractId) {
   console.log(`Reciever        | ${Receiver}`);
   console.log(`Transfer amount | ${Amount} Wei`);
   console.log(`Hash value      | ${hashSecret}`)
-  console.log(`Unlock time     | ${unlockTime} (~ ${Math.max(0, Math.floor((contract.timelock-nowSeconds())/6e4))} mins)`)
+  console.log(`Unlock time     | ${unlockTime} (~ ${Math.max(0, Math.floor((Number(contract.timelock)-nowSeconds())/60))} mins)`)
 
   return hashSecret
 
@@ -165,16 +165,12 @@ async function resolveHTLC(receiver, contractId, secret) {
   }
 
   const receiverBalanceBefore = await getBalance(receiver)
-  const withdrawTx = await htlc.methods.withdraw(
+  await htlc.methods.withdraw(
     contractId,
-    secret
-    ).send(
-    {
-    from: receiver,
-    gas: 1000000000,
-  })
-    
-  console.log(withdrawTx);
+    secret).send({from: receiver}).on('receipt',function(receipt){
+      console.log(receipt);
+    })
+
   const tx = await web3.eth.getTransaction(withdrawTx.tx)
 
   // Check contract funds are now at the receiver address
@@ -188,8 +184,6 @@ async function resolveHTLC(receiver, contractId, secret) {
     "receiver balance doesn't match"
     )
 
-  // contractArr = await htlc.methods.getContract(contractId).call()
-  // contract = htlcArrayToObj(contractArr)
   assert.isTrue(contract.withdrawn) // withdrawn set
   assert.isFalse(contract.refunded) // refunded still false
   assert.equal(contract.preimage, secret)

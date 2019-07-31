@@ -10,7 +10,7 @@ const fs = require('fs')
 function log(message){
 	fs.writeFileSync('contract_info.txt', message, 'utf8');
 }
-function ehtlc(message){
+function logg(message){
 	fs.writeFileSync('contract_extend_info.txt', message, 'utf8');
 }
 
@@ -119,10 +119,10 @@ async function verifyHTLC(htlc_id, Response){
 
 
 	if(htlc_id != htlcId){
-		throw 'Hash Time lock Contract id does not match'
+		throw 'Hash Time lock Contract id does not match with current contract record'
 	}
 	console.log(`Transaction amount      | ${amount} BTS`);
-	console.log(`From Account id 	     | ${accountId}`);
+	console.log(`From Account id 		 | ${accountId}`);
 	console.log(`HashLock                | ${hash}`);
 	console.log(`Total timeLock(seconds) | ${time_lock}`);
 	console.log(`Expiration time         | ${expiration}`);
@@ -140,7 +140,7 @@ async function resolveHTLC(Htlcid, Recipient, secret){
 
 						let tr = new TransactionBuilder();
 
-						let preimageValue = secret.substring(1);
+						let preimageValue = secret.substring(2);
 
 						let operationJSON = {
 
@@ -233,9 +233,8 @@ async function extendHTLC(sender, id, seconds){
 								.broadcast()
 								.then(result => {
 									const reply =  result[0].trx.expiration;
-									ehtlc(
+									logg(
 										"BTS HashTimelockContract was successfully extended! \nPlease redeem the contract before: " + reply);
-									
 									
 						})
 								.catch(err => {
@@ -246,6 +245,15 @@ async function extendHTLC(sender, id, seconds){
 				});
 };
 
+	
+	/*
+	 * As I tried to update the log for verify HTLC to 
+	 * get right information 
+	 * after sender extend the contract,
+	 * I notice the second time json response doesn't provide with operation results
+	 * official bitsharesjs informed in the code to update the get_htlc function implementation someday
+	 * wait for update
+	 */
 
 module.exports = {
 	deployHTLC,

@@ -60,12 +60,10 @@ async function btsForEth() {
    * time_lock value in minutes 
    * and create htlc contract
    */
-  //console.log('Secret:', '0x' + Buffer.from(secret).toString('hex'));
+
   hash_lock = '0x' + Buffer.from(hash_lock).toString('hex')
-  console.log(hash_lock);
-  time_lock = parseInt(time_lock / 2) // this is for less time for bts side to redeem the contract
-  let ethAmount = value * rate ;
-  console.log("ethAmount: ", ethAmount);
+  time_lock = parseInt(time_lock / 2) // this is to create less time than btsHTLC for bts side to redeem the contract
+  let ethAmount = Math.fround(value * rate) ;
   const ethHtlcId = await eth.deployHTLC(ethWallet, ethRecipient, hash_lock, time_lock, ethAmount)
 
 
