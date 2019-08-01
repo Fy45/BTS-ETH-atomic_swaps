@@ -8,7 +8,7 @@ const HDWalletProvider = require("truffle-hdwallet-provider")
 MY_SECRET_MNEMONIC = "cycle little able wish run zoo ethics twenty switch lava magnet jungle";
 env_api = "https://ropsten.infura.io/10347709826848a9a4347a1be1d02aa8";
 const HTLC_abi = require('../build/contracts/HashedTimelock')
-const HTLC_contract_address = '0x1Ac7a16F3520ED020bc42Ad8588391c8CBB450eA'
+const HTLC_contract_address = '0xDE9c184ebc2d3ecd4DAB88a51cEdE2dc789e30b6'
 
 let provider = new HDWalletProvider(MY_SECRET_MNEMONIC, env_api,0,10);
 const web3 = new Eth(provider);
