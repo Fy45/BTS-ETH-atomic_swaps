@@ -12,12 +12,13 @@ const sha256 = x =>
 const nowSeconds = () => Math.floor(Date.now() / 1000)
 
 
-let secret = "yfan";
+let secret = "f.vfAhRC.xw=Y-x22pMV9H9U<+V7!Mbr";
 const x = web3.utils.randomHex(32)
 const toAscii = web3.utils.fromAscii(secret);
-const buffer = '0x'+ new Buffer.from(secret).toString('hex');
-const xhh = buffer.substring(2)
-const bufferh = bufToStr(sha256(xhh))
+const n = toAscii.substring(2)
+const buffer = new Buffer.from(secret).toString('hex').length;
+//const xhh = buffer.substring(2)
+//const bufferh = bufToStr(sha256(xhh))
 const xh = sha256(random32())
 
 let timelock = nowSeconds()+ 275
@@ -30,5 +31,5 @@ console.log(timelock);
 console.log(changed);
 console.log(format);
 console.log(floor);
-console.log(remain);
+console.log(buffer);
 console.log(toAscii);

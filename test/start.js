@@ -7,6 +7,7 @@ const fs = require('fs')
 
 async function main() {
 
+  await sleep(2000)
   console.log('Enter 1 to send BTS to ETH');
   console.log('      2 to receive BTS from ETH');
   console.log('      3 to extend BTS contract time');

@@ -18,10 +18,9 @@ async function btsForEth() {
   let btsSender = await prompt('Enter BTS account name of sender: ')
   let btsRecipient = await prompt('Enter BTS account name of recipient: ') 
   let value = await prompt('Enter BTS amount to send: ')
-  let rate = await prompt('Enter the exchange rate both parties are agreed on (e.g. 0.00020788): ')
-  console.log("In order to resolve the contract smoothly, we highly recommended 32 length of secret use!");
+  let rate = await prompt('Enter the exchange rate both parties are agreed on: ')
+  console.log("In order to log contract uniformly, we highly recommended generating secret in length of 32!");
   let secret = await prompt('Enter the preimage value you generate: ') 
-  //const secret = randomBytes(32)
   let time_lock = await prompt('Enter the expiration time you want to lock (in seconds): ')
 
 
@@ -38,7 +37,7 @@ async function btsForEth() {
   //let api_key = await prompt('Also specify your ropsten infrua api_key: ')
   //const ethWallet = eth.connectAcc(mnemonic, api_key, id)
 
-  let id = await prompt('Enter the account id of ETH wallet (sender e.g. 0/1): ')
+  let id = await prompt('Enter the account id of ETH wallet (sender e.g. firstAcc is 0): ')
   let ethWallet = await eth.connectAcc(id);
   console.log('Ropsten ETH wallet address =', ethWallet);
   const ethRecipient = await prompt('Enter ETH address to receive funds: ')
@@ -52,7 +51,7 @@ async function btsForEth() {
   value = parseFloat(value);
   let Secret = new Buffer.from(secret).toString('hex');
   let hash_lock = hash.sha256(Secret);
-  let result = await bts.deployHTLC(btsSender, btsRecipient, hash_lock, value, time_lock, secret)
+  let result = await bts.deployHTLC(btsSender, btsRecipient, hash_lock, value, time_lock, Secret)
 
 
   /* 
@@ -76,8 +75,8 @@ async function btsForEth() {
   // Keeping logs on console
   console.log('BTS HTLC id:', btsHtlcid);
   console.log('ETH HTLC id:', ethHtlcId);
-  console.log(`Enter y if you want to redeem the agreed amount of ETH from contract ${ethHtlcId}`);
-  let answer = await prompt('Or enter exit: ')
+  console.log(`Enter y if you want to redeem the agreed amount of ETH from contract: \n${ethHtlcId} \nOr enter exit if you want to quit: `);
+  let answer = await prompt('> ')
   switch (answer) {
     case 'y':
       console.log('Resolving ETH HTLC...');

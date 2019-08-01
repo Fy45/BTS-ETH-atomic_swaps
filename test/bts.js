@@ -13,6 +13,9 @@ function log(message){
 function logg(message){
 	fs.writeFileSync('contract_extend_info.txt', message, 'utf8');
 }
+function logge(message){
+	fs.writeFileSync('contract_redeem.txt', message, 'utf8');
+}
 
 /*
  * Here we need to specify the rpc_endpoint_url since I am using the local private testnet
@@ -144,7 +147,7 @@ async function resolveHTLC(Htlcid, Recipient, secret){
 
 						let operationJSON = {
 
-							preimage: preimageValue,
+							preimage: new Buffer.from(preimageValue).toString("hex"),
 							fee: 
 							{
 								amount: 0,
@@ -173,8 +176,8 @@ async function resolveHTLC(Htlcid, Recipient, secret){
 							tr
 								.broadcast()
 								.then(result => {
-									console.log(
-										"BTS HashTimelockContract was successfully redeemed! "
+									logge(
+										"BTS HashTimelockContract was successfully redeemed! \n"+ JSON.stringify(result)
 										);
 
 								})

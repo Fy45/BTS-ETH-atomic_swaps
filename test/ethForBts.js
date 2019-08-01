@@ -20,6 +20,7 @@ async function ethForBts() {
   let id = await prompt('Enter the account id of recipient ETH wallet: ')
   const ethWallet = await eth.connectAcc(id);
   console.log('Ropsten ETH wallet address =', ethWallet);
+  let ethSender = await prompt('Enter the ETH sender Account Address: ')
 
   /* 
    * specify contract information
@@ -48,12 +49,19 @@ async function ethForBts() {
     .then(async function(secret) {
       const btsRecipient = await prompt('Enter the BTS account name to send the funds to: ')
       await bts.resolveHTLC(btsHtlcid, btsRecipient, secret)
+      console.log("Resolving BTS HTLC contract...");
+      await sleep(10000)
+      const output = fs.readFileSync('contract_redeem.txt', 'utf8');
+      console.log(output);
     })
     .catch(async function(err) {
       console.log(err);
       console.log('Refunding ETH...');
-      await eth.refundHTLC(ethWallet, ethHtlcId)
+      await eth.refundHTLC(ethSender, ethHtlcId)
     })
 }
 
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
 module.exports = ethForBts
