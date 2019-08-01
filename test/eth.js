@@ -8,7 +8,7 @@ const HDWalletProvider = require("truffle-hdwallet-provider")
 MY_SECRET_MNEMONIC = "cycle little able wish run zoo ethics twenty switch lava magnet jungle";
 env_api = "https://ropsten.infura.io/10347709826848a9a4347a1be1d02aa8";
 const HTLC_abi = require('../build/contracts/HashedTimelock')
-const HTLC_contract_address = '0x243785f6b65418191ea20b45fde7069ffe4f8cef'
+const HTLC_contract_address = '0x1Ac7a16F3520ED020bc42Ad8588391c8CBB450eA'
 
 let provider = new HDWalletProvider(MY_SECRET_MNEMONIC, env_api,0,10);
 const web3 = new Eth(provider);
@@ -32,6 +32,7 @@ const web3 = new Eth(provider);
 //     getAcc(e,id);
 //   });
 // }
+
 
 async function connectAcc(id) {
 
@@ -110,6 +111,7 @@ async function deployHTLC(sender, recipient, hash, time_lock, amount) {
 
   console.log("ETH HashTimelockContract was successfully created!");
   return contractId;
+
 }
 
 async function verifyHTLC(contractId) {
@@ -165,13 +167,9 @@ async function resolveHTLC(receiver, contractId, secret) {
   }
 
   const receiverBalanceBefore = await getBalance(receiver)
-  await htlc.methods.withdraw(
-    contractId,
-    secret).send({from: receiver, gas:200000}).on('receipt',function(receipt){
-      console.log(receipt);
-    })
-
-  const tx = await web3.eth.getTransaction(withdrawTx.tx)
+  const withdrawTx = await htlc.methods.withdraw(contractId,secret).send({from: receiver, gas:3000000})
+  
+  const tx = await web3.eth.getTransaction(withdrawTx.transactionHash)
 
   // Check contract funds are now at the receiver address
 
@@ -237,7 +235,7 @@ async function refundHTLC(sender, contractId) {
     from: sender,
     gas: 200000,
   })
-  const tx = await web3.eth.getTransaction(refundTx.tx)
+  const tx = await web3.eth.getTransaction(refundTx.transactionHash)
   const expectedBalance = senderBalanceBefore
                                   .add(amount)
                                   .sub(txGas(refundTx, tx.gasPrice))

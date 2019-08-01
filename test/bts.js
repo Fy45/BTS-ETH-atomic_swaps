@@ -122,7 +122,7 @@ async function verifyHTLC(htlc_id, Response){
 		throw 'Hash Time lock Contract id does not match with current contract record'
 	}
 	console.log(`Transaction amount      | ${amount} BTS`);
-	console.log(`From Account id 		 | ${accountId}`);
+	console.log(`From Account id         | ${accountId}`);
 	console.log(`HashLock                | ${hash}`);
 	console.log(`Total timeLock(seconds) | ${time_lock}`);
 	console.log(`Expiration time         | ${expiration}`);

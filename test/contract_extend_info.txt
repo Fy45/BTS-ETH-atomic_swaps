@@ -1,2 +1,0 @@
-BTS HashTimelockContract was successfully extended! 
-Please redeem the contract before: 2019-07-31T14:17:56
