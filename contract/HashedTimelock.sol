@@ -145,6 +145,7 @@ contract HashedTimelock {
      */
     function withdraw(bytes32 _contractId, bytes32 _preimage)
         external
+        payable
         contractExists(_contractId)
         hashlockMatches(_contractId, _preimage)
         withdrawable(_contractId)
@@ -167,6 +168,7 @@ contract HashedTimelock {
      */
     function refund(bytes32 _contractId)
         external
+        payable
         contractExists(_contractId)
         refundable(_contractId)
         returns (bool)
