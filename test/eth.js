@@ -167,7 +167,7 @@ async function resolveHTLC(receiver, contractId, secret) {
   }
 
   const receiverBalanceBefore = await getBalance(receiver)
-  const withdrawTx = await htlc.methods.withdraw(contractId,secret).send({from: receiver, gas:3000000})
+  const withdrawTx = await htlc.methods.withdraw(contractId,secret).call({from: receiver})
   
   const tx = await web3.eth.getTransaction(withdrawTx.transactionHash)
 
@@ -237,9 +237,8 @@ async function refundHTLC(sender, contractId) {
 
   
   const senderBalanceBefore = await getBalance(sender)
-  const refundTx = await htlc.methods.refund(contractId).send({
-    from: sender,
-    gas: 200000,
+  const refundTx = await htlc.methods.refund(contractId).call({
+    from: sender
   })
   const tx = await web3.eth.getTransaction(refundTx.transactionHash)
   const expectedBalance = senderBalanceBefore

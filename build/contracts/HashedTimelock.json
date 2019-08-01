@@ -45,8 +45,8 @@
         "type": "bool"
       }
     ],
-    "payable": true,
-    "stateMutability": "payable",
+    "payable": false,
+    "stateMutability": "nonpayable",
     "type": "function"
   },
   {
@@ -64,8 +64,8 @@
         "type": "bool"
       }
     ],
-    "payable": true,
-    "stateMutability": "payable",
+    "payable": false,
+    "stateMutability": "nonpayable",
     "type": "function"
   },
   {
@@ -174,18 +174,6 @@
       }
     ],
     "name": "LogHTLCRefund",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": false,
-        "name": "message",
-        "type": "string"
-      }
-    ],
-    "name": "Error",
     "type": "event"
   }
 ]
