@@ -3,7 +3,7 @@ const ethForBts = require('./ethForBts')
 const prompt = require('./helper/prompt')
 const eth = require('./eth')
 const bts = require('./bts')
-const fs = require('fs')
+
 
 async function main() {
 
@@ -30,9 +30,7 @@ async function main() {
       btsSender = await prompt('Enter your BTS account name: ')
       btsHtlcid = await prompt('Enter BTS HTLC_id you want to extend: ')
       Extratime = await prompt('Enter the extra time you need for contract (in seconds): ')
-      await bts.extendHTLC(btsSender, btsHtlcid, Extratime);
-      await sleep(10000);
-      const output = fs.readFileSync('contract_extend_info.txt', 'utf8');
+      let output = await bts.extendHTLC(btsSender, btsHtlcid, Extratime);
       console.log(output);
       break
     case '4':

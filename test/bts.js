@@ -50,7 +50,7 @@ async function deployHTLC(sender, recipient, Hash, amount, timelock, secret){
 				let time_lock = parseInt(timelock);
 				let hash = Hash;
 
-				Promise.all([
+				return Promise.all([
 					ChainStore.FetchChain("getAccount", fromAccount),
 					ChainStore.FetchChain("getAccount", toAccount)
 					]).then( res => {
@@ -80,7 +80,7 @@ async function deployHTLC(sender, recipient, Hash, amount, timelock, secret){
 
 						tr.add_type_operation("htlc_create", operationJSON);
 
-						tr.set_required_fees().then( () =>{
+						return tr.set_required_fees().then( () =>{
 
 							tr.add_signer(spKey, spKey.toPublicKey().toPublicKeyString());
 							// console.log(
@@ -90,13 +90,14 @@ async function deployHTLC(sender, recipient, Hash, amount, timelock, secret){
 
 							// 	);
 
-							tr
+							return tr
 
 								.broadcast()
 								.then (result => {
 									console.log(
 										"BTS HashTimelockContract was successfully created!" );
-									log(JSON.stringify(result));
+									//log(JSON.stringify(result));
+									resolve(result);
 								})
 								.catch( error => {
 									console.error(error);

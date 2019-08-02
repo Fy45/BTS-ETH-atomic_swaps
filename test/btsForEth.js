@@ -8,10 +8,9 @@ const hash = require('bitsharesjs').hash;
 const bts = require('./bts')
 const eth = require('./eth')
 const prompt = require('./helper/prompt')
-const fs = require('fs')
 const web3 = require('web3')
 
-async function btsForEth() {
+async function btsForEth(htlc) {
   
 
   // configure the BTS party (both side)
@@ -51,7 +50,14 @@ async function btsForEth() {
   value = parseFloat(value);
   let Secret = new Buffer.from(secret).toString('hex');
   let hash_lock = hash.sha256(Secret);
-  let result = await bts.deployHTLC(btsSender, btsRecipient, hash_lock, value, time_lock, Secret)
+  await bts.deployHTLC(btsSender, btsRecipient, hash_lock, value, time_lock, Secret)
+      .then(async function(result){
+          // resolve json response from bts HTLC and get the info we need
+          let btsHtlcresponse = result;
+          htlc = btsHtlcresponse[0].trx.operation_results[0];
+          let btsHtlcid = htlc[1];
+          console.log('BTS HTLC id:', btsHtlcid)
+      })
 
 
   /* 
@@ -67,13 +73,11 @@ async function btsForEth() {
 
 
 
-  // resolve json response from bts HTLC and get the info we need
-  let btsHtlcresponse = JSON.parse(fs.readFileSync('contract_info.txt', 'utf8'));
-  result = btsHtlcresponse[0].trx.operation_results[0];
-  let btsHtlcid = result[1];
+  
+
 
   // Keeping logs on console
-  console.log('BTS HTLC id:', btsHtlcid);
+ 
   console.log('ETH HTLC id:', ethHtlcId);
   console.log(`Enter y if you want to redeem the agreed amount of ETH from contract: \n${ethHtlcId} \nOr enter exit if you want to quit: `);
   let answer = await prompt('> ')
