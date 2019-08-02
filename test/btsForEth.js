@@ -7,12 +7,27 @@ const PrivateKey = require('bitsharesjs').PrivateKey;
 const hash = require('bitsharesjs').hash;
 const bts = require('./bts')
 const eth = require('./eth')
-const prompt = require('./prompt')
+const prompt = require('./helper/prompt')
+const fs = require('fs')
+const web3 = require('web3')
 
 async function btsForEth() {
+  
+
+  // configure the BTS party (both side)
+  let btsSender = await prompt('Enter BTS account name of sender: ')
+  let btsRecipient = await prompt('Enter BTS account name of recipient: ') 
+  let value = await prompt('Enter BTS amount to send: ')
+  let rate = await prompt('Enter the exchange rate both parties are agreed on: ')
+  console.log("In order to log contract uniformly, we highly recommended generating secret in length of 32!");
+  let secret = await prompt('Enter the preimage value you generate: ') 
+  let time_lock = await prompt('Enter the expiration time you want to lock (in seconds): ')
+
+
 
   /* 
-   * configure the ETH party(sender)
+   * configure the ETH party(both side)
+   * in this case we require the receiver side specify address
    * the comment code is use for other user,
    * since it involves important values in MetaMask wallet
    * for now it's only test locally
@@ -20,33 +35,23 @@ async function btsForEth() {
 
   //let mnemonic = await prompt('Enter the secret mnemonics to get access to your metamask wallet: ')
   //let api_key = await prompt('Also specify your ropsten infrua api_key: ')
-  let id = await prompt('Enter the account id of ETH wallet (sender): ')
   //const ethWallet = eth.connectAcc(mnemonic, api_key, id)
-  const ethWallet = eth.connectAcc(id)
-  console.log('Ropsten ETH wallet address =', ethWallet);
 
-  // configure the BTS party (both side)
-  let btsSender = await prompt('Enter BTS account name of sender: ')
-  let btsRecipient = await prompt('Enter BTS account name of recipient: ')
+  let id = await prompt('Enter the account id of ETH wallet (sender e.g. firstAcc is 0): ')
+  let ethWallet = await eth.connectAcc(id);
+  console.log('Ropsten ETH wallet address =', ethWallet);
+  const ethRecipient = await prompt('Enter ETH address to receive funds: ')
+
+
+
   /* 
    * selling BTS buying ETH,
    * generate the htlc contract on BTS side
    */
-  let value = await prompt('Enter BTS amount to send: ')
-  value = parseFloat(value)
-  const ethRecipient = await prompt('Enter ETH address to receive funds: ')
-  let secret = await prompt('Enter the preimage value you generate: ') 
-  const preimageValue = secret; // pass to bts_htlc
-
-
-  //const secret = randomBytes(32)
-  let time_lock = await prompt('Enter the expiration time you want to lock (in seconds): ')
-  console.log('Secret:', '0x' + Buffer.from(secret).toString('hex'));
-  let hash = hash.sha256(secret)
-  var excuted = await bts.deployHTLC(btsSender, btsRecipient, hash, value, time_lock)
-  // we have 2 return values from the deploy function that we need.
-  const btsHtlcid = excuted.id;
-  const btsHtlcrespone = excuted.response;
+  value = parseFloat(value);
+  let Secret = new Buffer.from(secret).toString('hex');
+  let hash_lock = hash.sha256(Secret);
+  let result = await bts.deployHTLC(btsSender, btsRecipient, hash_lock, value, time_lock, Secret)
 
 
   /* 
@@ -54,25 +59,39 @@ async function btsForEth() {
    * time_lock value in minutes 
    * and create htlc contract
    */
-  hash = '0x' + Buffer.from(hash).toString('hex')
-  time_lock = parseInt(time_lock / (60*2)) // this is for less time for bts side to redeem the contract
-  const ethHtlcAddress = await eth.deployHTLC(ethWallet, ethRecipient, hash, time_lock)
+
+  hash_lock = '0x' + Buffer.from(hash_lock).toString('hex')
+  time_lock = parseInt(time_lock / 2) // this is to create less time than btsHTLC for bts side to redeem the contract
+  let ethAmount = Math.fround(value * rate) ;
+  const ethHtlcId = await eth.deployHTLC(ethWallet, ethRecipient, hash_lock, time_lock, ethAmount)
+
+
+
+  // resolve json response from bts HTLC and get the info we need
+  let btsHtlcresponse = JSON.parse(fs.readFileSync('contract_info.txt', 'utf8'));
+  result = btsHtlcresponse[0].trx.operation_results[0];
+  let btsHtlcid = result[1];
 
   // Keeping logs on console
   console.log('BTS HTLC id:', btsHtlcid);
-  console.log('ETH HTLC address:', ethHtlcAddress);
-  console.log(`Enter 1 if agreed amount of ETH has been sent to ${ethHtlcAddress}`);
-  let answer = await prompt('Or enter 2 to extend your HTLC contract before the timeout: ')
+  console.log('ETH HTLC id:', ethHtlcId);
+  console.log(`Enter y if you want to redeem the agreed amount of ETH from contract: \n${ethHtlcId} \nOr enter exit if you want to quit: `);
+  let answer = await prompt('> ')
   switch (answer) {
-    case '1':
+    case 'y':
       console.log('Resolving ETH HTLC...');
-      await eth.resolveHTLC(ethWallet, ethHtlcAddress, '0x' + secret.toString('hex'))
+      await eth.resolveHTLC(ethRecipient, ethHtlcId, web3.utils.asciiToHex(secret))
       break
-    case '2':
-      Extratime = await prompt('Enter the extra time you need for contract (in seconds): ')
-      await bts.extendHTLC(btsHtlcid, Extratime)
+    case 'exit':
+      console.log('Exiting...');
       break
+      
   }
+ 
 }
 
+
+
+
 module.exports = btsForEth
+

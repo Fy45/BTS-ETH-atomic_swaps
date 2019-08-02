@@ -1,20 +1,28 @@
 {
-  "name": "bts-eth",
+  "name": "BTS-ETH-atomic_swaps",
   "version": "1.0.0",
   "description": "",
-  "main": "bts.js",
+  "main": "start_index.js",
   "directories": {
     "test": "test"
   },
   "dependencies": {
     "bitsharesjs": "^3.1.1",
     "bitsharesjs-ws": "^3.1.1",
-    "truffle-hdwallet-provider": "^1.0.14",
+    "ethereumjs-abi": "^0.6.7",
+    "log4js": "^4.5.1",
+    "truffle-hdwallet-provider": "^1.0.15",
     "web3": "^1.2.0"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "chai": "^4.2.0"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Fy45/BTS-ETH-atomic_swaps.git"
   },
   "keywords": [],
   "author": "",

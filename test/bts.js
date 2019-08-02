@@ -4,8 +4,18 @@ const ChainStore = require('bitsharesjs').ChainStore;
 const FetchChain = require('bitsharesjs').FetchChain;
 const PrivateKey = require('bitsharesjs').PrivateKey;
 const hash = require('bitsharesjs').hash;
-const btsForEth = require('./btsForEth')
-const web3 = require('web3')
+//const btsForEth = require('./btsForEth') is wrong, we are not allowed to circular dependency
+const fs = require('fs')
+
+function log(message){
+	fs.writeFileSync('contract_info.txt', message, 'utf8');
+}
+function logg(message){
+	fs.writeFileSync('contract_extend_info.txt', message, 'utf8');
+}
+function logge(message){
+	fs.writeFileSync('contract_redeem.txt', message, 'utf8');
+}
 
 /*
  * Here we need to specify the rpc_endpoint_url since I am using the local private testnet
@@ -18,7 +28,11 @@ var sprivKey = "5Kecd9SoyHEYbSrUnadGzSokptuTWNMKi4M4CgXh7dSNSzLkNLq";
 let spKey = PrivateKey.fromWif(sprivKey);
 var rprivKey = "5Hwv9FXXrMd4o3FaHFJRLwuMmsihLz29bAGQYon4arK6ZzXCQhB";
 let rpKey = PrivateKey.fromWif(rprivKey);
-
+Apis.instance(rpc_endpoint_url, true).init_promise.then(
+		res => {
+			console.log("Successfully connected to BTS local test network.")
+			return ChainStore.init(false);
+		});
 
 /* 
  * Instance the connection using the api
@@ -27,44 +41,25 @@ let rpKey = PrivateKey.fromWif(rprivKey);
  * check your environment before use
  */
 
-// async function connect(){
-// 	Apis.instance(rpc_endpoint_url,true).init_promise.then(
-// 		res => {
 
-// 			console.log("Connected to: local private test network");
-// 			ChainStore.init(false).then( function (e) => {
-// 				let bSenderAccount = "yfan";
-
-// 				Promise.all([
-// 					FetchChain("getAccount",bSenderAccount)]).then(res => {
-// 						let [bSenderAccount] = res;
-// 						console.log("Successfully connected to BTS local network and using account:", bSenderAccount.get("id"));
-// 					})
-    
-// });
-// 		})
-// }
-// connect();
-
-async function deployHTLC(sender, recipient, hash, amount, time_lock){
-	Apis.instance(rpc_endpoint_url, true).init_promise.then(
-		res => {
-			console.log("Successfully connected to BTS local test network.")
-			ChainStore.init(false).then(() => {
+async function deployHTLC(sender, recipient, Hash, amount, timelock, secret){
 
 				let fromAccount = sender;
 				let toAccount = recipient;
+				
+				let time_lock = parseInt(timelock);
+				let hash = Hash;
 
 				Promise.all([
-					FetchChain("getAccount", fromAccount),
-					FetchChain("getAccount", toAccount)
+					ChainStore.FetchChain("getAccount", fromAccount),
+					ChainStore.FetchChain("getAccount", toAccount)
 					]).then( res => {
 
 						let [fromAccount, toAccount] =  res;
 
 						let tr = new TransactionBuilder();
 
-						let preimageValue = btsForEth.btsForEth().preimageValue;
+						let preimageValue = secret;
 						let preimage_hash_calculated = hash;
 
 						let operationJSON = {
@@ -88,75 +83,59 @@ async function deployHTLC(sender, recipient, hash, amount, time_lock){
 						tr.set_required_fees().then( () =>{
 
 							tr.add_signer(spKey, spKey.toPublicKey().toPublicKeyString());
-							console.log(
+							// console.log(
 
-								"serialized transaction: \n",
-								tr.serialize().operations
+							// 	"serialized transaction: \n",
+							// 	tr.serialize().operations
 
-								);
+							// 	);
 
 							tr
 
 								.broadcast()
 								.then (result => {
 									console.log(
-										"HashTimelockContract was successfully created!" );
-									getHtlcId(result);
+										"BTS HashTimelockContract was successfully created!" );
+									log(JSON.stringify(result));
 								})
 								.catch( error => {
 									console.error(error);
 								});
 						});
 					});
-			}
+			};
 
-				)
-			}
-		
-		)
-}
-function getHtlcId(res){
-	const response = res;
-	const result = res[0].trx.operation_results[0];
-	const htlc_id = result[1];
 
-	return {
-		id:htlc_id, 
-		response:response
-	};
-}
-
-async function verifyHTLC(htlc_id, response){
+async function verifyHTLC(htlc_id, Response){
+	let response = Response;
 	const op = response[0].trx.operations[0];
-	const op_result = res[0].trx.operation_results[0];
+	const op_result = response[0].trx.operation_results[0];
+	const expiration = response[0].trx.expiration
+
 	const hash = op[1].preimage_hash[1];
-	var time_lock = op[1].claim_period_seconds;
 	var amount = op[1].amount.amount;
 	const accountId = op[1].from;
+	const timelock = op[1].claim_period_seconds;
+	let time_lock = parseInt(timelock);
+
 	const htlcId = op_result[1];
 
 
-
 	if(htlc_id != htlcId){
-		throw 'Hash Time lock Contract id does not match'
+		throw 'Hash Time lock Contract id does not match with current contract record'
 	}
-	console.log("Please check the following conditions: \n");
-	console.log("Transaction amount: ", amount);
-	console.log("From Account id: ", accountId);
-	console.log("Preimage hashed value: ", hash);
-	console.log("Expiration time left (in seconds): ", time_lock);
+	console.log(`Transaction amount      | ${amount} BTS`);
+	console.log(`From Account id         | ${accountId}`);
+	console.log(`HashLock                | ${hash}`);
+	console.log(`Total timeLock(seconds) | ${time_lock}`);
+	console.log(`Expiration time         | ${expiration}`);
 
 	return hash;
 }
 
 async function resolveHTLC(Htlcid, Recipient, secret){
-	const preimage = web3.utils.toAscii(secret);
-	Apis.instance(rpc_endpoint_url, true).init_promise.then(
-		res => {
-			console.log("Successfully connected to BTS local test network.")
-			ChainStore.init(false).then(() => {
-				let toAccount = Recipient;
-
+	
+	let toAccount = Recipient;
 				Promise.all(
 					[FetchChain("getAccount", toAccount)]).then (res => {
 
@@ -164,11 +143,11 @@ async function resolveHTLC(Htlcid, Recipient, secret){
 
 						let tr = new TransactionBuilder();
 
-						let preimageValue = preimage;
+						let preimageValue = secret.substring(2);
 
 						let operationJSON = {
 
-							preimage: new Buffer(preimageValue).toString("hex"),
+							preimage: new Buffer.from(preimageValue).toString("hex"),
 							fee: 
 							{
 								amount: 0,
@@ -179,9 +158,9 @@ async function resolveHTLC(Htlcid, Recipient, secret){
 							extensions: null
 						};
 
-						console.log(
-							"tx prior serialization \n", 
-							operationJSON);
+						// console.log(
+						// 	"tx prior serialization \n", 
+						// 	operationJSON);
 
 						tr.add_type_operation("htlc_redeem", operationJSON);
 
@@ -189,16 +168,16 @@ async function resolveHTLC(Htlcid, Recipient, secret){
 
 							tr.add_signer(rpKey, rpKey.toPublicKey().toPublicKeyString());
 
-							console.log(
-								"serialized transaction: \n",
-								tr.serialize().operations
-								);
+							// console.log(
+							// 	"serialized transaction: \n",
+							// 	tr.serialize().operations
+							// 	);
 
 							tr
 								.broadcast()
 								.then(result => {
-									console.log(
-										"HashTimelockContract was successfully redeemed! "
+									logge(
+										"BTS HashTimelockContract was successfully redeemed! \n"+ JSON.stringify(result)
 										);
 
 								})
@@ -208,9 +187,7 @@ async function resolveHTLC(Htlcid, Recipient, secret){
 						});
 
 					});
-				});
-		}
-}
+				};
 
 /*
  * Bitshares blockchain doesn't provide refund function
@@ -218,13 +195,7 @@ async function resolveHTLC(Htlcid, Recipient, secret){
  * Taking transactionBuilder test code function as example
  */
 
-async function extendHTLC(id, seconds){
-
-	Apis.instance(rpc_endpoint_url, true).init_promise.then(
-		res => {
-			console.log("Successfully connected to BTS local test network.")
-			ChainStore.init(false).then(() => {
-
+async function extendHTLC(sender, id, seconds){
 				let fromAccount = sender;
 
 				Promise.all([
@@ -233,7 +204,7 @@ async function extendHTLC(id, seconds){
 
 						let tr = new TransactionBuilder();
 						let Htlc_id = id;
-						let extend_time = seconds;
+						let extend_time = parseInt(seconds);
 
 						let operationJSON = {
 							fee: {
@@ -242,13 +213,13 @@ async function extendHTLC(id, seconds){
 							},
 							htlc_id: Htlc_id,
 							update_issuer: fromAccount.get("id"),
-							seconds_to_add: seconds,
+							seconds_to_add: extend_time,
 							extensions: null
 						};
 
-						console.log(
-							"extend operation serialization \n",
-							operationJSON );
+						// console.log(
+						// 	"extend operation serialization \n",
+						// 	operationJSON );
 
 
 						tr.add_type_operation("htlc_extend", operationJSON);
@@ -256,18 +227,17 @@ async function extendHTLC(id, seconds){
 						tr.set_required_fees().then(() => {
 							tr.add_signer(spKey, spKey.toPublicKey().toPublicKeyString());
 
-							console.log(
-								"serialized transaction: \n",
-								tr.serialize().operations
-								);
+							// console.log(
+							// 	"serialized transaction: \n",
+							// 	tr.serialize().operations
+							// 	);
 
 							tr
 								.broadcast()
 								.then(result => {
-									//const reply =  
-									console.log(
-										"HashTimelockContract was successfully extended!");
-									console.log("Please redeem the contract before: ", result);
+									const reply =  result[0].trx.expiration;
+									logg(
+										"BTS HashTimelockContract was successfully extended! \nPlease redeem the contract before: " + reply);
 									
 						})
 								.catch(err => {
@@ -276,15 +246,21 @@ async function extendHTLC(id, seconds){
 
 					});
 				});
-			});
-		});
+};
 
-}
+	
+	/*
+	 * As I tried to update the log for verify HTLC to 
+	 * get right information 
+	 * after sender extend the contract,
+	 * I notice the second time json response doesn't provide with operation results
+	 * official bitsharesjs informed in the code to update the get_htlc function implementation someday
+	 * wait for update
+	 */
 
 module.exports = {
-  deployHTLC,
-  verifyHTLC,
-  resolveHTLC,
-  extendHTLC
-}
-
+	deployHTLC,
+	verifyHTLC,
+	resolveHTLC,
+	extendHTLC
+};
