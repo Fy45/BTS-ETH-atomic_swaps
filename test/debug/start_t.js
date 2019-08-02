@@ -1,7 +1,6 @@
 const btsForEth = require('./btsF')
 const ethForBts = require('./FBts')
 const prompt = require('./helper/prompt')
-const eth = require('./eth')
 const bts = require('./bts')
 const fs = require('fs')
 

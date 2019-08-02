@@ -5,10 +5,10 @@ const crypto = require('crypto')
 const assertEqualBN = require('./helper/assert')
 const htlcArrayToObj = require('./helper/utils')
 const HDWalletProvider = require("truffle-hdwallet-provider")
-MY_SECRET_MNEMONIC = "cycle little able wish run zoo ethics twenty switch lava magnet jungle";
-env_api = "https://ropsten.infura.io/10347709826848a9a4347a1be1d02aa8";
+const MY_SECRET_MNEMONIC = "cycle little able wish run zoo ethics twenty switch lava magnet jungle";
+const env_api = "https://ropsten.infura.io/10347709826848a9a4347a1be1d02aa8";
 const HTLC_abi = require('../build/contracts/HashedTimelock')
-const HTLC_contract_address = '0xDE9c184ebc2d3ecd4DAB88a51cEdE2dc789e30b6'
+const HTLC_contract_address = '0xD42289E8BA4CeF4a8282aFFE38996ec904001F0b'
 
 let provider = new HDWalletProvider(MY_SECRET_MNEMONIC, env_api,0,10);
 const web3 = new Eth(provider);
@@ -167,15 +167,15 @@ async function resolveHTLC(receiver, contractId, secret) {
   }
 
   const receiverBalanceBefore = await getBalance(receiver)
-  const withdrawTx = await htlc.methods.withdraw(contractId,secret).call({from: receiver})
-  
+  const withdrawTx = await htlc.methods.withdraw(contractId,secret).send({from:receiver, gas:30000})
   const tx = await web3.eth.getTransaction(withdrawTx.transactionHash)
+
 
   // Check contract funds are now at the receiver address
 
   const expectedBalance = receiverBalanceBefore
                               .add(amount)
-                              .sub(txGas(withdrawTx, tx.gasPrice))
+                              .sub(withdrawTx, tx.gasPrice)
   assertEqualBN(
     await getBalance(receiver),
     expectedBalance,
@@ -237,8 +237,9 @@ async function refundHTLC(sender, contractId) {
 
   
   const senderBalanceBefore = await getBalance(sender)
-  const refundTx = await htlc.methods.refund(contractId).call({
-    from: sender
+  const refundTx = await htlc.methods.refund(contractId).send({
+    from: sender,
+    gas: 300000
   })
   const tx = await web3.eth.getTransaction(refundTx.transactionHash)
   const expectedBalance = senderBalanceBefore

@@ -1,5 +1,4 @@
 const bts = require('./bts')
-const eth = require('./eth')
 const fs = require('fs');
 const prompt = require('./helper/prompt')
 

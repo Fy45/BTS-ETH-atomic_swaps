@@ -1,67 +1,85 @@
 const bts = require('./bts')
 const eth = require('./eth')
-const fs = require('fs');
 const prompt = require('./helper/prompt')
+
+
 
 async function ethForBts() {
 
-
   /* 
-   * configure the ETH party(receiver)
+   * configure the ETH party(both side)
+   * in this case we require the receiver side specify address
    * the comment code is use for other user,
    * since it involves important values in MetaMask wallet
    * for now it's only test locally
    */
 
-  //let mnemonic = await prompt('Enter the secret mnemonics to get access to your metamask wallet: ')
+  //let mnemonic = await prompt('Enter the secret mnemonics (12 words) to get access to your metamask wallet: ')
   //let api_key = await prompt('Also specify your ropsten infrua api_key: ')
-  //const ethWallet = eth.connectAcc(mnemonic, api_key, id)
+  //const ethSender = eth.connectAcc(mnemonic, api_key, id)
 
-  let id = await prompt('Enter the account id of recipient ETH wallet: ')
-  const ethWallet = await eth.connectAcc(id);
-  console.log('Ropsten ETH wallet address =', ethWallet);
-  let ethSender = await prompt('Enter the ETH sender Account Address: ')
+  let id = await prompt('Enter the your sender account id of ETH wallet(e.g. firstAcc is 0): ')
+  let ethSender = await eth.connectAcc(id);
+  console.log('Ropsten ETH wallet address =', ethSender);
+  const ethRecipient = await prompt('Enter ETH address to receive funds: ')
+  let ethAmount = await prompt('Enter the ETH you want to send: ')
+  let hash_lock = await prompt('Enter the hash_value you got from BTS side: ')
+  console.log("In order to protect your money, please lock the contract less time than BTS does...");
+  let time_lock = await prompt('Enter the time you want to lock in contract (seconds): ')
+
 
   /* 
-   * specify contract information
-   * the deployHTLC should return the htlc_id
+   * selling ETH buying BTS,
+   * generate the htlc contract on ETH side
+   */
+
+  const ethHtlcId = await eth.deployHTLC(ethSender, ethRecipient, hash_lock, time_lock, ethAmount)
+  console.log('ETH HTLC id:', ethHtlcId);
+  console.log("Please inform your counter party with the ETH HTLC id: ", ethHtlcId)
+  const btsRecipient = await prompt('Enter the your BTS account name: ')
+
+  /* 
+   * Verify the contract
    * check both HashSecret to see if they are match
-   * maybe don't need client to input the preimage
    */
   const btsHtlcid = await prompt('Enter the BTS HTLC id: ')
-  const ethHtlcId = await prompt('Enter the ETH HTLC id: ')
   console.log('\nBTS HTLC:');
-  const btsHtlcresponse = JSON.parse(fs.readFileSync('contract_info.txt', 'utf8'));
-  
-  const btsHashSecret = await bts.verifyHTLC(btsHtlcid, btsHtlcresponse)
-  //console.log(btsHashSecret);
-  console.log('\nETH HTLC:');
-  const ethHashSecret = await eth.verifyHTLC(ethHtlcId)
-  if ('0x' + btsHashSecret !== ethHashSecret) {
+  const btsHashSecret = await bts.verifyHTLC(btsHtlcid)
+  if (btsHashSecret !== hash_lock) {
     throw "Hashes don't match"
   }
-  
-  console.log(`\nIf details are correct then send the agreed amount of ETH to ${ethHtlcId}`);
-  console.log('Waiting for ETH contract to be resolved...');
 
-  // complete the transaction
-  await eth.waitForHTLC(ethHtlcId)
-    .then(async function(secret) {
-      const btsRecipient = await prompt('Enter the BTS account name to send the funds to: ')
-      await bts.resolveHTLC(btsHtlcid, btsRecipient, secret)
-      console.log("Resolving BTS HTLC contract...");
-      await sleep(10000)
-      const output = fs.readFileSync('contract_redeem.txt', 'utf8');
-      console.log(output);
-    })
-    .catch(async function(err) {
-      console.log(err);
-      console.log('Refunding ETH...');
-      await eth.refundHTLC(ethSender, ethHtlcId)
-    })
+  /*
+   * Redeem the BTS contract
+   * or refund ETH after time expires
+   * transaction complete
+   */
+  console.log(`\nIf details are correct then input yes to redeem your BTS`);
+  console.log(`\nOr else please enter exit and talk with your counter party: `);
+  let answer = await prompt('> ')
+  switch (answer) {
+    case 'yes':
+      console.log('Waiting for ETH contract to be resolved...');
+      // complete the transaction
+      await eth.waitForHTLC(ethHtlcId)
+        .then(async function(secret) {
+          console.log("Resolving BTS HTLC contract...");
+          const output = bts.resolveHTLC(btsHtlcid, btsRecipient, secret)
+          console.log(output);
+        })
+        .catch(async function(err) {
+          console.log(err);
+          console.log('Refunding ETH...');
+          await eth.refundHTLC(ethSender, ethHtlcId)
+        })
+      break
+
+    case 'exit':
+      console.log('Exiting...');
+      break
+
+  }
+
 }
 
-function sleep(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
-}
 module.exports = ethForBts

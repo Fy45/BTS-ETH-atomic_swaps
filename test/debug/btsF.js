@@ -6,7 +6,6 @@ const FetchChain = require('bitsharesjs').FetchChain;
 const PrivateKey = require('bitsharesjs').PrivateKey;
 const hash = require('bitsharesjs').hash;
 const bts = require('./bts')
-const eth = require('./eth')
 const prompt = require('./helper/prompt')
 const fs = require('fs')
 const web3 = require('web3')
@@ -18,7 +17,6 @@ async function btsForEth() {
   let btsSender = await prompt('Enter BTS account name of sender: ')
   let btsRecipient = await prompt('Enter BTS account name of recipient: ') 
   let value = await prompt('Enter BTS amount to send: ')
-  let rate = await prompt('Enter the exchange rate both parties are agreed on (e.g. 0.00020788): ')
   console.log("In order to resolve the contract smoothly, we highly recommended 32 length of secret use!");
   let secret = await prompt('Enter the preimage value you generate: ') 
   //const secret = randomBytes(32)
@@ -52,9 +50,7 @@ async function btsForEth() {
   value = parseFloat(value);
   let Secret = new Buffer.from(secret).toString('hex');
   let hash_lock = hash.sha256(Secret);
-  let result = await bts.deployHTLC(btsSender, btsRecipient, hash_lock, value, time_lock, secret)
-
-
+  
   /* 
    * generate the hash value in bytes32 format,
    * time_lock value in minutes 
@@ -69,32 +65,16 @@ async function btsForEth() {
 
 
   // resolve json response from bts HTLC and get the info we need
-  await sleep(10000);
-  let btsHtlcresponse = JSON.parse(fs.readFileSync('contract_info.txt', 'utf8'));
-  result = btsHtlcresponse[0].trx.operation_results[0];
-  let btsHtlcid = result[1];
-
-  // Keeping logs on console
-  console.log('BTS HTLC id:', btsHtlcid);
-  //console.log('ETH HTLC id:', ethHtlcId);
-  //console.log(`Enter y if you want to redeem the agreed amount of ETH from contract ${ethHtlcId}`);
-  let answer = await prompt('Or enter exit: ')
-  switch (answer) {
-    case 'y':
-      console.log('Resolving ETH HTLC...');
-      await eth.resolveHTLC(ethRecipient, ethHtlcId, web3.utils.asciiToHex(secret))
-      break
-    case 'exit':
-      console.log('Exiting...');
-      break
-      
-  }
+    const btsHtlcresponse = await bts.deployHTLC(btsSender, btsRecipient, hash_lock, value, time_lock, Secret)
+    result = btsHtlcresponse[0].trx.operation_results[0];
+    let btsHtlcid = result[1];
+    console.log('BTS HTLC id:', btsHtlcid);
+    
+    let check = await bts.verifyHTLC(btsHtlcid);
+    console.log(check);
  
 }
 
-function sleep(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
-}
 
 
 module.exports = btsForEth
