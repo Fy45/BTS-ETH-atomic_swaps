@@ -40,9 +40,9 @@ async function ethForBts() {
    * Verify the contract
    * check both HashSecret to see if they are match
    */
-  const btsHtlcid = await prompt('Enter the BTS HTLC id: ')
+  const btsHtlcId = await prompt('Enter the BTS HTLC id: ')
   console.log('\nBTS HTLC:');
-  const btsHashSecret = await bts.verifyHTLC(btsHtlcid)
+  const btsHashSecret = await bts.verifyHTLC(btsHtlcId)
   if (btsHashSecret !== hash_lock) {
     throw "Hashes don't match"
   }
@@ -62,7 +62,7 @@ async function ethForBts() {
       await eth.waitForHTLC(ethHtlcId)
         .then(async function(secret) {
           console.log("Resolving BTS HTLC contract...");
-          const output = await bts.resolveHTLC(btsHtlcid, btsRecipient, secret)
+          const output = await bts.resolveHTLC(btsHtlcId, btsRecipient, secret)
           console.log(output);
         })
         .catch(async function(err) {

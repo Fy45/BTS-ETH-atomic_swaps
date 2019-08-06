@@ -73,56 +73,52 @@ npm run test
    ``` json
    Error: Transaction has been reverted by the EVM:
    {
-   "blockHash": "0x5527aacc2c64e344007b3e607791c42b2580c78d2546a4851174c1bd79033791",
-   "blockNumber": 6138086,
-   "contractAddress": null,
-   "cumulativeGasUsed": 3287976,
-   "from": "0x209f4b189e246ae171da5a6f1815c91c70caa23a",
-   "gasUsed": 27327,
-   "logsBloom":    "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
-   "status": false,
-   "to": "0x243785f6b65418191ea20b45fde7069ffe4f8cef",
-   "transactionHash": "0x8a141c64dc103beef44aaaa9aae9cffec502d7d7ac8848a95a4d006a64ae89f4",
-   "transactionIndex": 15,
-   "events": {}
+   	"blockHash": 	"0x5527aacc2c64e344007b3e607791c42b2580c78d2546a4851174c1bd79033791",
+   	"blockNumber": 6138086,
+   	"contractAddress": null,
+   	"cumulativeGasUsed": 3287976,
+   	"from": "0x209f4b189e246ae171da5a6f1815c91c70caa23a",
+   	"gasUsed": 27327,
+   	"logsBloom":    "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+   	"status": false,
+   	"to": "0x243785f6b65418191ea20b45fde7069ffe4f8cef",
+   	"transactionHash": "0x8a141c64dc103beef44aaaa9aae9cffec502d7d7ac8848a95a4d006a64ae89f4",
+   	"transactionIndex": 15,
+   	"events": {}
    }
    ```
    
-  In solidity language, using `sha256(...)` will require tightly packed arguments, thus, `abi.encodePacked(...)` is applied, this packed algorithm will not treat types shorter than 32 bytes with either zero padded or sign extended. So the preimage should have length limit. [see here](https://solidity.readthedocs.io/en/v0.4.24/abi-spec.html#abi-packed-mode)
+    In solidity language, using `sha256(...)` will require tightly packed arguments, thus, `abi.encodePacked(...)` is applied, this packed algorithm will not treat types shorter than 32 bytes with either zero padded or sign extended. So the preimage should have length limit. [see here](https://solidity.readthedocs.io/en/v0.4.24/abi-spec.html#abi-packed-mode)
    
-
+   
+   
    c. (Bitshares) Alice informs Bob with the hash value and HTLC id
-
-   ``` yaml
+   
+   ```yaml
    Please inform your counter party with the hash value: _some_hash_value_
    and BTS HTLC id: 1.16.xxx
    ```
-
    
-
-   d. (Ethereum) Bob calls `newContract` with the know hash value and gets the HTLC id
-
-   ``` yaml
+    d. (Ethereum) Bob calls `newContract` with the know hash value and gets the HTLC id
+   
+   ```yaml
    Enter your sender account id of ETH wallet(e.g. firstAcc is 0): 0
-   > Ropsten ETH wallet address = Bob_account_address
+   
+   Ropsten ETH wallet address = Bob_account_address
    Enter ETH address to receive funds: Alice_account_address
    Enter the ETH you want to send: agreed_amount
-   Enter the hash_value you got from BTS side: _same_hash_value_
+   Enter the hash_value you got from BTS side: same_hash_value
    To protect your money, please lock the contract less time than BTS does...
    Enter the time you want to lock in contract (seconds): 1800
    
    Deploying...
    ```
-
    
-
-   e. (Ethereum) Bob informs Alice with the HTLC id
-
-   ``` yaml
-   Please inform your counterparty with the ETH HTLC id: eth_htlc_contract_id
+    e. (Ethereum) Bob informs Alice with the HTLC id
+   
+   ```yaml
+    Please inform your counterparty with the ETH HTLC id: eth_htlc_contract_id
    ```
-
-   
 
 3. Verify:
 
@@ -172,8 +168,6 @@ npm run test
    Account: Alice_account_address has balance of _new_balance_ ETH
    ```
    
-   
-   
    b. (Bitshares) Bob gets the secret and calls withdraw to redeem BTS.
    
    c. (Ethereum) Bob calls the `waitForHTLC` function to wait for Alice claim the ETH and reveals preimage
@@ -192,7 +186,7 @@ npm run test
    BTS HashTimelockContract was successfully redeemed at : Mon Aug 05 2019 14:22:04 GMT+0200 (GMT+02:00) 
    Account Balance is _new_balance_ BTS  
    ```
-
+   
    
 
 ### Failed transaction
