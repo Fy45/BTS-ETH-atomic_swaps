@@ -68,12 +68,27 @@ npm run test
 
    *NOTE*:
 
-   Here I specify the length of preimage should be no shorter than 32, that is because of the `bytes32` format using in solidity contract creation. However, other lengths of preimage would also perform the contract correctly, it will simply cause the `Event` error with match failure due to the wrong length, see below:
+   Here I specify the length of preimage should be no shorter than 32, that is because of the `bytes32` format using in solidity contract creation. Wrong length of preimage will cause the contract reverted by EVM, see below:
 
+   ``` json
+   Error: Transaction has been reverted by the EVM:
+   {
+   "blockHash": "0x5527aacc2c64e344007b3e607791c42b2580c78d2546a4851174c1bd79033791",
+   "blockNumber": 6138086,
+   "contractAddress": null,
+   "cumulativeGasUsed": 3287976,
+   "from": "0x209f4b189e246ae171da5a6f1815c91c70caa23a",
+   "gasUsed": 27327,
+   "logsBloom":    "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+   "status": false,
+   "to": "0x243785f6b65418191ea20b45fde7069ffe4f8cef",
+   "transactionHash": "0x8a141c64dc103beef44aaaa9aae9cffec502d7d7ac8848a95a4d006a64ae89f4",
+   "transactionIndex": 15,
+   "events": {}
+   }
    ```
    
-   ```
-
+  In solidity language, using `sha256(...)` will require tightly packed arguments, thus, `abi.encodePacked(...)` is applied, this packed algorithm will not treat types shorter than 32 bytes with either zero padded or sign extended. So the preimage should have length limit. [see here](https://solidity.readthedocs.io/en/v0.4.24/abi-spec.html#abi-packed-mode)
    
 
    c. (Bitshares) Alice informs Bob with the hash value and HTLC id
