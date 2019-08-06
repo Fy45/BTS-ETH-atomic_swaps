@@ -152,8 +152,8 @@ npm run test
 
    If the hashlock and timelock requirement checks out, then redeem successfully, showing the redeemed time and the balance of Bob account
 
-   ```yaml
-ETH HashTimelockContract was successfully redeemed!
+   ``` yaml
+   ETH HashTimelockContract was successfully redeemed!
    Account: Alice_account_address has balance of _new_balance_ ETH
    ```
    
@@ -163,7 +163,7 @@ ETH HashTimelockContract was successfully redeemed!
    
    c. (Ethereum) Bob calls the `waitForHTLC` function to wait for Alice claim the ETH and reveals preimage
    
-   ```yaml
+   ``` yaml
    If details are correct then input yes to redeem your BTS
    Or else please enter exit and talk with your counter party: 
    > yes
@@ -172,7 +172,7 @@ ETH HashTimelockContract was successfully redeemed!
    
    If the hashlock and timelock requirement checks out, then redeem successfully, showing the after balance of Alice account
    
-   ```yaml
+   ``` yaml
    Resolving BTS HTLC contract...
    BTS HashTimelockContract was successfully redeemed at : Mon Aug 05 2019 14:22:04 GMT+0200 (GMT+02:00) 
    Account Balance is _new_balance_ BTS  
@@ -201,7 +201,7 @@ Then after the timelock expires on BTS side, the locked BTS will return to Alice
 
 We also provide Alice with the ability to extend the timelock of her contract by calling `extendHTLC` function:
 
-```yaml
+``` yaml
 Enter your BTS account name: Alice
 Enter BTS HTLC_id you want to extend: 1.16.xxx
 Enter the extra time you need for contract (in seconds): 300
