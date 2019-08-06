@@ -33,7 +33,7 @@ npm run test
 
 - Alice is selling BTS to Bob
 - Bob is selling ETH to Alice
-- Alice initiates the trade and generating the secret `preimage x` (preferable >= 31 length)
+- Alice initiates the trade and generating the secret `preimage x` (should >= 32 length)
 - Alice creates a new HTLC on the Bitshares with the hashed_preimage
 - Bob creates a new HTLC on the Ethereum HTLC contract to hold the ETH using the hash value
 - Alice claims ETH revealing `x` to the HTLC contract on Ethereum
