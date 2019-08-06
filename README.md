@@ -52,6 +52,7 @@ npm run test
 2. Contract:
 
    a. Alice generates the preimage secret `x`
+   
    b. (Bitshares) Alice initiates the contract with contract details and gets the HTLC id
 
    ``` yaml
