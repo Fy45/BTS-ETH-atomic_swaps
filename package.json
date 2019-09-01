@@ -15,7 +15,7 @@
     "chai": "^4.2.0"
   },
   "scripts": {
-    "test": "node src/start"
+    "run": "node src/start"
   },
   "repository": {
     "type": "git",
