@@ -22,7 +22,7 @@ You could get Ether for test only through a faucet for the Ropsten [here](https:
 ### Run program
 
 ```bash
-npm run test
+npm run start
 ```
 
 ### Scenario Sequence Diagram
