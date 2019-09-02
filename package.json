@@ -24,10 +24,9 @@
   },
   "scripts": {
     "start": "node src/start",
-    "test": "mocha --timeout 10000",
     "cov": "nyc report --report",
     "test:nyc": "nyc mocha",
-    "test:cov": "nyc mocha && npm run cov"
+    "test": "nyc mocha && npm run cov"
   },
   "repository": {
     "type": "git",
