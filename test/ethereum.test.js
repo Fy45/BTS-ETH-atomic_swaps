@@ -12,7 +12,7 @@ const MNEMONIC = "cycle little able wish run zoo ethics twenty switch lava magne
 const ENV_API = "https://ropsten.infura.io/10347709826848a9a4347a1be1d02aa8"; 
 const id = "0"; 
 const Addr = "0xe2B1B5d92b64846D815cd34c674973f88DcefF4d"
-const r_addr='Received function did not throw'
+const r_addr='0x209f4b189e246Ae171da5a6F1815c91C70CAA23A'
 
 describe('connectAcc', async function() {
   it('loads user account',  async function() {
@@ -38,16 +38,23 @@ describe('connectAcc', async function() {
   it('throws if invalid environment api',  async function(){
     const expectedError = 
     'Invalid environment api https://abc.testnet, please check'
-    expect(() => Ethereum.connectAcc(MNEMONIC, 'https://abc.testnet', id)).toThrowError(
-      expectedError
-      )
+     try{
+       await Ethereum.connectAcc(MNEMONIC, 'https://abc.testnet', id)
+       assert.fail(expectedError)
+    }
+    catch(err){
+      assert.isFalse(err.message.startsWith('stop'))
+    }
   })
   it('throws if load an invaild testnet account',  async function(){
     const expectedError = 
     'The provided account id x is invalid in this blockchain network, please check'
-    expect(() => Ethereum.connectAcc(MNEMONIC, ENV_API, 'x')).toThrowError(
-      expectedError
-      )
+     try{ Ethereum.connectAcc(MNEMONIC, ENV_API, 'x')
+       assert.fail(expectedError)
+    }
+    catch(err){
+      assert.isFalse(err.message.startsWith('stop'))
+    }
   })
 })
 
