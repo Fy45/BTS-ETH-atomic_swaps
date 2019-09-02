@@ -51,5 +51,6 @@ newSecretHashPair,
 htlcArrayToObj,
 random32,
 sha256,
-getBalance
+getBalance,
+isSha256Hash
 }

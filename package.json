@@ -10,8 +10,6 @@
   "dependencies": {
     "@babel/polyfill": "^7.4.4",
     "@babel/runtime": "^7.5.5",
-    "ava": "^2.3.0",
-    "babel-jest": "^24.9.0",
     "bitsharesjs": "^3.1.1",
     "truffle-hdwallet-provider": "^1.0.15",
     "web3": "^1.2.0"
@@ -20,19 +18,16 @@
     "@babel/core": "^7.5.5",
     "@babel/plugin-transform-runtime": "^7.5.5",
     "@babel/preset-env": "^7.5.5",
-    "babel-plugin-transform-runtime": "^6.23.0",
     "chai": "^4.2.0",
-    "expect": "^24.9.0",
-    "jest": "^24.9.0",
     "mocha": "^6.2.0",
     "nyc": "^14.1.1"
   },
   "scripts": {
     "start": "node src/start",
-    "test": "jest test",
+    "test": "mocha --timeout 10000",
     "cov": "nyc report --report",
-    "test:nyc": "nyc jest -v",
-    "test:cov": "nyc jest -v && npm run cov"
+    "test:nyc": "nyc mocha",
+    "test:cov": "nyc mocha && npm run cov"
   },
   "repository": {
     "type": "git",
