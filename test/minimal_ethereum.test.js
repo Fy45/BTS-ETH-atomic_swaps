@@ -10,21 +10,21 @@ const isSha256Hash = require('../src/helper/utils').isSha256Hash
 const HTLC_ADDR = "0x243785f6b65418191ea20b45fde7069ffe4f8cef";
 const MNEMONIC =
   "cycle little able wish run zoo ethics twenty switch lava magnet jungle";
-const ENV_API = "https://ropsten.infura.io/10347709826848a9a4347a1be1d02aa8";
+const api_key = "https://ropsten.infura.io/10347709826848a9a4347a1be1d02aa8";
 const id = "0";
 const Addr = "0xe2B1B5d92b64846D815cd34c674973f88DcefF4d";
 const r_addr = "0x209f4b189e246Ae171da5a6F1815c91C70CAA23A";
 
 describe("connectAcc", async function() {
   it("loads user account", async function() {
-    Ethereum.connectAcc(MNEMONIC, ENV_API, id).then(address => {
+    Ethereum.connectAcc(MNEMONIC, api_key, id).then(address => {
       assert.equal(Addr, address,'user is loaded');
     });
   });
   it("throws if invalid Metamask mnemonic", async function() {
     const expectedError = "Invalid Metamask mnemonic z x c v b n, please check";
     try {
-      await Ethereum.connectAcc("z x c v b n", ENV_API, id);
+      await Ethereum.connectAcc("z x c v b n", api_key, id);
       assert.fail(expectedError);
     } catch (err) {
        console.log(err)
@@ -44,7 +44,7 @@ describe("connectAcc", async function() {
     const expectedError =
       "The provided account id x is invalid in this blockchain network, please check";
     try {
-      Ethereum.connectAcc(MNEMONIC, ENV_API, "x");
+      Ethereum.connectAcc(MNEMONIC, api_key, "x");
       assert.fail(expectedError);
     } catch (err) {
      console.log(err)
@@ -58,7 +58,7 @@ describe("createHashedTimelockContract", async () => {
     const amount = 0.01;
     const newContractId =  await Ethereum.deployHTLC(
       MNEMONIC,
-      ENV_API,
+      api_key,
       Addr,
       r_addr,
       hashpair.hash,
@@ -76,7 +76,7 @@ describe("createHashedTimelockContract", async () => {
     try {
       await Ethereum.deployHTLC(
         MNEMONIC,
-        ENV_API,
+        api_key,
         Addr,
         r_addr,
         "abc",
@@ -95,7 +95,7 @@ describe("createHashedTimelockContract", async () => {
     try {
       await Ethereum.deployHTLC(
         MNEMONIC,
-        ENV_API,
+        api_key,
         Addr,
         r_addr,
         hashpair.hash,
@@ -114,7 +114,7 @@ describe("createHashedTimelockContract", async () => {
   const hashpair = newSecretHashPair();
 
     try {
-      await Ethereum.deployHTLC(MNEMONIC, ENV_API, Addr, r_addr, hashpair.hash, 10, 0);
+      await Ethereum.deployHTLC(MNEMONIC, api_key, Addr, r_addr, hashpair.hash, 10, 0);
       assert.fail(expectedError);
      
     } catch (err){
@@ -130,7 +130,7 @@ describe("createHashedTimelockContract", async () => {
 //     const amount = 0.01;
 //     const contractId = await Ethereum.deployHTLC(
 //       MNEMONIC,
-//       ENV_API,
+//       api_key,
 //       Addr,
 //       r_addr,
 //       hashpair.hash,
@@ -138,7 +138,7 @@ describe("createHashedTimelockContract", async () => {
 //       amount
 //     );
 
-//     Ethereum.verifyHTLC(MNEMONIC, ENV_API, contractId).then(hashValue => {
+//     Ethereum.verifyHTLC(MNEMONIC, api_key, contractId).then(hashValue => {
 //       assert.equal(hashValue,hashpair.hash, "Hash matches");
 //       done();
 //     });
@@ -146,7 +146,7 @@ describe("createHashedTimelockContract", async () => {
 //   it("throw if cotract does not exists", async () => {
 //     const expectedError = "Expected failure due to invalid contract id";
 //     try {
-//       await Ethereum.verifyHTLC(MNEMONIC, ENV_API, "0xabc1");
+//       await Ethereum.verifyHTLC(MNEMONIC, api_key, "0xabc1");
 //       assert.fail(expectedError);
 //     } catch(err) { 
 //       console.log(err)
@@ -161,20 +161,20 @@ describe("createHashedTimelockContract", async () => {
 //     const recipient = Addr;
 //     const contractId = await Ethereum.deployHTLC(
 //       MNEMONIC,
-//       ENV_API,
+//       api_key,
 //       r_addr,
 //       recipient,
 //       hashpair.hash,
 //       10,
 //       amount
 //     );
-//     const provider = new HDWalletProvider(MNEMONIC, ENV_API, 0, 10);
+//     const provider = new HDWalletProvider(MNEMONIC, api_key, 0, 10);
 //     const web3 = new Web3(provider);
 
 //     const expectedBalance = getBalance(recipient);
 //     Ethereum.resolveHTLC(
 //       MNEMONIC,
-//       ENV_API,
+//       api_key,
 //       recipient,
 //       contractId,
 //       hashpair.secret
@@ -190,7 +190,7 @@ describe("createHashedTimelockContract", async () => {
 //     const wrongSecret = random32().toString("hex");
 //     const contractId = await Ethereum.deployHTLC(
 //       MNEMONIC,
-//       ENV_API,
+//       api_key,
 //       r_addr,
 //       recipient,
 //       hashpair.hash,
@@ -201,7 +201,7 @@ describe("createHashedTimelockContract", async () => {
 //     try {
 //       await Ethereum.resolveHTLC(
 //         MNEMONIC,
-//         ENV_API,
+//         api_key,
 //         recipient,
 //         contractId,
 //         wrongSecret
@@ -218,7 +218,7 @@ describe("createHashedTimelockContract", async () => {
 //     const recipient = Addr;
 //     const contractId = await Ethereum.deployHTLC(
 //       MNEMONIC,
-//       ENV_API,
+//       api_key,
 //       r_addr,
 //       recipient,
 //       hashpair.hash,
@@ -229,7 +229,7 @@ describe("createHashedTimelockContract", async () => {
 //     try {
 //       await Ethereum.resolveHTLC(
 //         MNEMONIC,
-//         ENV_API,
+//         api_key,
 //         r_addr,
 //         contractId,
 //         hashpair.secret
@@ -246,7 +246,7 @@ describe("createHashedTimelockContract", async () => {
 //     const recipient = Addr;
 //     const contractId = await Ethereum.deployHTLC(
 //       MNEMONIC,
-//       ENV_API,
+//       api_key,
 //       r_addr,
 //       recipient,
 //       hashpair.hash,
@@ -258,7 +258,7 @@ describe("createHashedTimelockContract", async () => {
 //     try {
 //       await Ethereum.resolveHTLC(
 //         MNEMONIC,
-//         ENV_API,
+//         api_key,
 //         recipient,
 //         contractId,
 //         hashpair.secret
@@ -277,18 +277,18 @@ describe("createHashedTimelockContract", async () => {
 //     const sender = Addr;
 //     const contractId = await Ethereum.deployHTLC(
 //       MNEMONIC,
-//       ENV_API,
+//       api_key,
 //       sender,
 //       r_addr,
 //       hashpair.hash,
 //       10,
 //       amount
 //     );
-//     const provider = new HDWalletProvider(MNEMONIC, ENV_API, 0, 10);
+//     const provider = new HDWalletProvider(MNEMONIC, api_key, 0, 10);
 //     const web3 = new Web3(provider);
 
 //     const expectedBalance = getBalance(sender) + amount;
-//     Ethereum.refundHTLC(MNEMONIC, ENV_API, sender, contractId).then(balance => {
+//     Ethereum.refundHTLC(MNEMONIC, api_key, sender, contractId).then(balance => {
 //      assert.equal(balance, expectedBalance, "balance right")
 //     });
 //   });
@@ -298,7 +298,7 @@ describe("createHashedTimelockContract", async () => {
 //     const sender = Addr;
 //     const contractId = await Ethereum.deployHTLC(
 //       MNEMONIC,
-//       ENV_API,
+//       api_key,
 //       sender,
 //       r_addr,
 //       hashpair.hash,
@@ -308,7 +308,7 @@ describe("createHashedTimelockContract", async () => {
 
 //     const expectedError = "Expected failure due to refund before time expires";
 //     try {
-//       await Ethereum.refundHTLC(MNEMONIC, ENV_API, sender, contractId);
+//       await Ethereum.refundHTLC(MNEMONIC, api_key, sender, contractId);
 //       assert.fail(expectedError);
 //     } catch(err) {
 //        console.log(err)

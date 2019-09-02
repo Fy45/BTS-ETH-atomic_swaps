@@ -11,15 +11,13 @@ async function ethForBts() {
    * for now it's only test locally
    */
 
- 
-
 
   let mnemonic = await prompt('Enter the secret mnemonics (12 words) to get access to your metamask wallet: ')
   let api_key = await prompt('Also specify your environment api_key: ')
   let id = await prompt(
     "Enter your sender account id of ETH wallet(e.g. firstAcc is 0): "
   );
-  const ethSender = eth.connectAcc(mnemonic, api_key, id)
+  const ethSender = await eth.connectAcc(mnemonic, api_key, id)
   console.log(`Ropsten ETH wallet address  ${ethSender}`);
   const ethRecipient = await prompt("Enter ETH address to receive funds: ");
   let ethAmount = await prompt("Enter the ETH you want to send: ");
@@ -38,7 +36,7 @@ async function ethForBts() {
 
   const ethHtlcId = await eth.deployHTLC(
     mnemonic,
-    env_api,
+    api_key,
     ethSender,
     ethRecipient,
     hash_lock,
@@ -74,7 +72,7 @@ async function ethForBts() {
       console.log("Waiting for ETH contract to be resolved...");
       // complete the transaction
       await eth
-        .waitForHTLC(mnemonic, env_api, ethHtlcId)
+        .waitForHTLC(mnemonic, api_key, ethHtlcId)
         .then(async function(secret) {
           console.log("Resolving BTS HTLC contract...");
           const output = await bts.resolveHTLC(btsHtlcId, btsRecipient, secret);
@@ -85,7 +83,7 @@ async function ethForBts() {
           console.log("Refunding ETH...");
           const balance = await eth.refundHTLC(
             mnemonic,
-            env_api,
+            api_key,
             ethSender,
             ethHtlcId
           );

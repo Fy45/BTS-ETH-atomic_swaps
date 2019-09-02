@@ -18,8 +18,7 @@ const HTLC_contract_address = "0x243785f6b65418191ea20b45fde7069ffe4f8cef";
 
 async function connectAcc(mnemonic, api_key, id) {
   const MY_SECRET_MNEMONIC = mnemonic;
-  const env_api = api_key;
-  const provider = new HDWalletProvider(MY_SECRET_MNEMONIC, env_api, 0, 10);
+  const provider = new HDWalletProvider(MY_SECRET_MNEMONIC, api_key, 0, 10);
   const web3 = new Eth(provider);
   let account = await web3.eth.getAccounts();
   const address = account[id];
@@ -46,8 +45,7 @@ async function deployHTLC(
   amount
 ) {
   const MY_SECRET_MNEMONIC = mnemonic;
-  const env_api = api_key;
-  const provider = new HDWalletProvider(MY_SECRET_MNEMONIC, env_api, 0, 10);
+  const provider = new HDWalletProvider(MY_SECRET_MNEMONIC, api_key, 0, 10);
   const web3 = new Eth(provider);
   const htlc = new web3.eth.Contract(HTLC_abi, HTLC_contract_address);
   console.log("Deploying...");
@@ -101,8 +99,7 @@ async function deployHTLC(
 
 async function verifyHTLC(mnemonic, api_key, contractId) {
   const MY_SECRET_MNEMONIC = mnemonic;
-  const env_api = api_key;
-  const provider = new HDWalletProvider(MY_SECRET_MNEMONIC, env_api, 0, 10);
+  const provider = new HDWalletProvider(MY_SECRET_MNEMONIC, api_key, 0, 10);
   const web3 = new Eth(provider);
   const htlc = new web3.eth.Contract(HTLC_abi, HTLC_contract_address);
 
@@ -130,8 +127,7 @@ async function verifyHTLC(mnemonic, api_key, contractId) {
 
 async function resolveHTLC(mnemonic, api_key, receiver, contractId, secret) {
   const MY_SECRET_MNEMONIC = mnemonic;
-  const env_api = api_key;
-  const provider = new HDWalletProvider(MY_SECRET_MNEMONIC, env_api, 0, 10);
+  const provider = new HDWalletProvider(MY_SECRET_MNEMONIC, api_key, 0, 10);
   const web3 = new Eth(provider);
   const htlc = new web3.eth.Contract(HTLC_abi, HTLC_contract_address);
 
@@ -193,8 +189,7 @@ async function resolveHTLC(mnemonic, api_key, receiver, contractId, secret) {
 
 async function waitForHTLC(mnemonic, api_key, contractId) {
   const MY_SECRET_MNEMONIC = mnemonic;
-  const env_api = api_key;
-  const provider = new HDWalletProvider(MY_SECRET_MNEMONIC, env_api, 0, 10);
+  const provider = new HDWalletProvider(MY_SECRET_MNEMONIC, api_key, 0, 10);
   const web3 = new Eth(provider);
   const htlc = new web3.eth.Contract(HTLC_abi, HTLC_contract_address);
 
@@ -223,8 +218,7 @@ async function waitForHTLC(mnemonic, api_key, contractId) {
 async function refundHTLC(mnemonic, api_key, sender, contractId) {
 
   const MY_SECRET_MNEMONIC = mnemonic;
-  const env_api = api_key;
-  const provider = new HDWalletProvider(MY_SECRET_MNEMONIC, env_api, 0, 10);
+  const provider = new HDWalletProvider(MY_SECRET_MNEMONIC, api_key, 0, 10);
   const web3 = new Eth(provider);
   const htlc = new web3.eth.Contract(HTLC_abi, HTLC_contract_address);
 

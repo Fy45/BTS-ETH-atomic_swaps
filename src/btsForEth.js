@@ -53,7 +53,7 @@ async function btsForEth() {
   let mnemonic = await prompt('Enter the secret mnemonics (12 words) to get access to your metamask wallet: ')
   let api_key = await prompt('Also specify your environment api_key: ')
   let id = await prompt("Enter your recipient account id of ETH wallet: ");
-  const ethRecipient = await eth.connectAcc(mnemonic, env_api, id);
+  const ethRecipient = await eth.connectAcc(mnemonic, api_key, id);
   console.log(`Ropsten ETH wallet address: ${ethRecipient}`);
 
   /*
@@ -61,7 +61,7 @@ async function btsForEth() {
    */
   const ethHtlcId = await prompt("Enter the ETH HTLC id: ");
   console.log("\nETH HTLC:");
-  const ethHashSecret = await eth.verifyHTLC(mnemonic, env_api, ethHtlcId);
+  const ethHashSecret = await eth.verifyHTLC(mnemonic, api_key, ethHtlcId);
   if (hash_lock !== ethHashSecret) {
     throw "Hashes don't match";
   }
@@ -80,7 +80,7 @@ async function btsForEth() {
       console.log("Resolving ETH HTLC...");
       const balance = await eth.resolveHTLC(
         mnemonic,
-        env_api,
+        api_key,
         ethRecipient,
         ethHtlcId,
         web3.utils.asciiToHex(secret)
