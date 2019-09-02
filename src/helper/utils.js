@@ -46,4 +46,11 @@ const htlcArrayToObj = c => {
 
 const getBalance = async (address) => web3.utils.toBN(await web3.eth.getBalance(address))
 
-module.exports = htlcArrayToObj
+module.exports = {
+newSecretHashPair,
+htlcArrayToObj,
+random32,
+sha256,
+getBalance,
+isSha256Hash
+}

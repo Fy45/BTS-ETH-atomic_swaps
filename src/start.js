@@ -26,10 +26,12 @@ async function main() {
       await ethForBts()
       break
     case '3':
+      let mnemonic = await prompt('Enter the secret mnemonics (12 words) to get access to your metamask wallet: ')
+      let api_key = await prompt('Also specify your environment api_key: ')
       let ethHtlcId = await prompt('Enter the HTLC id you want to keep track on: ')
       let btsHtlcId = await prompt('Enter your BTS HTLC id: ')
       console.log('Waiting for ETH contract to be resolved...');
-      await eth.waitForHTLC(ethHtlcId)
+      await eth.waitForHTLC(mnemonic, api_key, ethHtlcId)
         .then(async function(secret) {
           let btsRecipient = await prompt('Enter your BTS account name: ')
           console.log("Resolving BTS HTLC contract...");
@@ -40,21 +42,23 @@ async function main() {
           console.log(err);
           let ethSender = await prompt('Enter your ETH sender address: ')
           console.log('Refunding ETH...');
-          await eth.refundHTLC(ethSender, ethHtlcId)
+          await eth.refundHTLC(mnemonic, api_key, ethSender, ethHtlcId)
         })
       break
     case '4':
+      let mnemonic = await prompt('Enter the secret mnemonics (12 words) to get access to your metamask wallet: ')
+      let api_key = await prompt('Also specify your environment api_key: ')
       let ethRecipient = await prompt('Enter your ETH receiver address: ')
-      let ethHtlcId = await prompt('Enter your ETH HTLC id: ')
+      let ethHtlc = await prompt('Enter your ETH HTLC id: ')
       let secret = await prompt('Enter your preimage: ')
       console.log("Resolving ETH HTLC... ");
-      await eth.resolveHTLC(ethRecipient, ethHtlcId, '0x' + Buffer.from(secret).toString('hex'))
+      await eth.resolveHTLC(mnemonic, api_key, ethRecipient, ethHtlc, '0x' + Buffer.from(secret).toString('hex'))
       break
     case '5':
       let btsSender = await prompt('Enter your BTS account name: ')
-      let btsHtlcId = await prompt('Enter BTS HTLC_id you want to extend: ')
+      let btsHtlc = await prompt('Enter BTS HTLC_id you want to extend: ')
       let Extratime = await prompt('Enter the extra time you need for contract (in seconds): ')
-      let output = await bts.extendHTLC(btsSender, btsHtlcId, Extratime);
+      let output = await bts.extendHTLC(btsSender, btsHtlc, Extratime);
       console.log(output);
       break
   }

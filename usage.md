@@ -20,6 +20,6 @@ Then, sign up and create your own project in [here](https://infura.io/login), ge
 
 The contract I am using is [hashed-timelock-contract-ethereum](https://github.com/chatch/hashed-timelock-contract-ethereum).  Take a look and get the contract address you need.
 
-Substitute `MY_SECRET_MNEMONIC`, `env_api` and `HTLC_contract_address` with the parameters I mentioned above, then have fun with this swap program!
+Substitute `MY_SECRET_MNEMONIC`, `api_key` and `HTLC_contract_address` with the parameters I mentioned above, then have fun with this swap program!
 
 Enjoy the code!
