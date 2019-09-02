@@ -1,27 +1,49 @@
 {
   "name": "BTS-ETH-atomic_swaps",
   "version": "1.0.0",
-  "description": "",
-  "main": "start_index.js",
+  "description": "Simple nodejs framework designed for cross-chain atomic trade between Bitshares and Ethereum",
+  "main": "src/start.js",
   "directories": {
-    "test": "test"
+    "test": "test",
+    "src": "src"
   },
   "dependencies": {
+    "@babel/polyfill": "^7.4.4",
+    "@babel/runtime": "^7.5.5",
+    "ava": "^2.3.0",
+    "babel-jest": "^24.9.0",
     "bitsharesjs": "^3.1.1",
     "truffle-hdwallet-provider": "^1.0.15",
     "web3": "^1.2.0"
   },
   "devDependencies": {
-    "chai": "^4.2.0"
+    "@babel/core": "^7.5.5",
+    "@babel/plugin-transform-runtime": "^7.5.5",
+    "@babel/preset-env": "^7.5.5",
+    "babel-plugin-transform-runtime": "^6.23.0",
+    "chai": "^4.2.0",
+    "expect": "^24.9.0",
+    "jest": "^24.9.0",
+    "mocha": "^6.2.0",
+    "nyc": "^14.1.1"
   },
   "scripts": {
-    "start": "node src/start"
+    "start": "node src/start",
+    "test": "jest test",
+    "cov": "nyc report --report",
+    "test:nyc": "nyc jest -v",
+    "test:cov": "nyc jest -v && npm run cov"
   },
   "repository": {
     "type": "git",
     "url": "https://github.com/Fy45/BTS-ETH-atomic_swaps.git"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": [
+    "cross-chain",
+    "bitsharesjs",
+    "ethereum",
+    "atomic"
+  ],
+  "author": "Yuan",
   "license": "ISC"
 }
