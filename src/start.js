@@ -26,12 +26,12 @@ async function main() {
       await ethForBts()
       break
     case '3':
-      let mnemonic = await prompt('Enter the secret mnemonics (12 words) to get access to your metamask wallet: ')
-      let api_key = await prompt('Also specify your environment api_key: ')
+      let Mnemonic = await prompt('Enter the secret mnemonics (12 words) to get access to your metamask wallet: ')
+      let Api_key = await prompt('Also specify your environment api_key: ')
       let ethHtlcId = await prompt('Enter the HTLC id you want to keep track on: ')
       let btsHtlcId = await prompt('Enter your BTS HTLC id: ')
       console.log('Waiting for ETH contract to be resolved...');
-      await eth.waitForHTLC(mnemonic, api_key, ethHtlcId)
+      await eth.waitForHTLC(Mnemonic, Api_key, ethHtlcId)
         .then(async function(secret) {
           let btsRecipient = await prompt('Enter your BTS account name: ')
           console.log("Resolving BTS HTLC contract...");
