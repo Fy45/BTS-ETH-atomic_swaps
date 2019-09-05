@@ -25,7 +25,7 @@
   "scripts": {
     "start": "node src/start",
     "cov": "nyc report --report",
-    "test:mocha":"mocha test --exit",
+    "test:mocha":"mocha",
     "test:nyc": "nyc mocha --exit",
     "test": "nyc mocha --exit && npm run cov"
   },
