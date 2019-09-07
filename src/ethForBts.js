@@ -43,9 +43,7 @@ async function ethForBts() {
     time_lock,
     ethAmount
   );
-  console.log(
-    `Please inform your counterparty with the ETH HTLC id ${ethHtlcId}`
-  );
+
   const btsRecipient = await prompt("Enter your BTS account name: ");
 
   /*
@@ -69,6 +67,8 @@ async function ethForBts() {
   let answer = await prompt("> ");
   switch (answer) {
     case "yes":
+      console.log(
+      `Please inform your counterparty with the ETH HTLC id ${ethHtlcId}`);
       console.log("Waiting for ETH contract to be resolved...");
       // complete the transaction
       await eth
